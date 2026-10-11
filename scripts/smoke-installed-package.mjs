@@ -46,7 +46,11 @@ async function ready(port) {
 
 let service;
 try {
-  const pack = JSON.parse(npm(['pack', '--json', '--pack-destination', temp]));
+  // Build first, then pack with --ignore-scripts: the prepack lifecycle
+  // (vite) prints colored output to stdout, which corrupts pack --json.
+  npm(['run', 'build:admin']);
+  npm(['run', 'build']);
+  const pack = JSON.parse(npm(['pack', '--json', '--ignore-scripts', '--pack-destination', temp]));
   assert.ok(pack[0].files.some(file => file.path === 'LICENSE'), 'Packed package must contain Apache-2.0 license');
   assert.ok(pack[0].files.some(file => file.path === 'dist/admin/index.html'), 'Packed package must contain the console');
   const tarball = join(temp, pack[0].filename);

@@ -12,6 +12,8 @@ let legacyConfigCandidates: typeof import('../src/storage/migrate-storage.js')['
 const home = process.env.MEMORYDOCK_HOME!;
 const targetIndex = process.env.MEMORYDOCK_INDEX_PATH!;
 const originalAppData = process.env.APPDATA;
+const originalXdg = process.env.XDG_CONFIG_HOME;
+const originalHome = process.env.HOME;
 
 const scratchDirs: string[] = [];
 
@@ -26,6 +28,8 @@ afterEach(() => {
   // Restore per-test env mutations.
   process.env.MEMORYDOCK_NOTES_PATH = path.join(home, 'notes');
   if (originalAppData === undefined) delete process.env.APPDATA; else process.env.APPDATA = originalAppData;
+  if (originalXdg === undefined) delete process.env.XDG_CONFIG_HOME; else process.env.XDG_CONFIG_HOME = originalXdg;
+  if (originalHome === undefined) delete process.env.HOME; else process.env.HOME = originalHome;
   // Clean per-test artifacts under the temp home.
   rmSync(targetIndex, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   rmSync(path.join(home, 'backups'), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -220,14 +224,26 @@ describe('migrateStorage', () => {
     const source = path.join(scratchDir(), 'legacy-index');
     await buildLegacyIndex(source);
 
-    const fakeAppData = path.join(scratchDir(), 'appdata');
-    const legacyConfigDir = path.join(fakeAppData, 'FlowNote');
+    // Place the legacy config where this platform's candidates actually look:
+    // APPDATA on Windows, ~/Library/Application Support on macOS, and
+    // XDG_CONFIG_HOME on Linux. os.homedir() reads $HOME on POSIX, so
+    // overriding it keeps the test off the real home directory.
+    const legacyRoot = path.join(scratchDir(), 'legacy-root');
+    let legacyConfigDir: string;
+    if (process.platform === 'win32') {
+      legacyConfigDir = path.join(legacyRoot, 'FlowNote');
+      process.env.APPDATA = legacyRoot;
+    } else if (process.platform === 'darwin') {
+      legacyConfigDir = path.join(legacyRoot, 'Library', 'Application Support', 'FlowNote');
+      process.env.HOME = legacyRoot;
+    } else {
+      legacyConfigDir = path.join(legacyRoot, 'flownote');
+      process.env.XDG_CONFIG_HOME = legacyRoot;
+    }
     mkdirSync(legacyConfigDir, { recursive: true });
     writeFileSync(path.join(legacyConfigDir, 'config.json'), JSON.stringify({
       embedding: { provider: 'ollama', baseUrl: 'http://127.0.0.1:11434/v1', apiKey: '', model: 'nomic-embed-text', dim: 768 },
     }));
-
-    process.env.APPDATA = fakeAppData;
     const result = await migrateStorage(source); // migrateConfig defaults to true
     expect(result.entries).toBe(1);
 
