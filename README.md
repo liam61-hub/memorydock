@@ -24,6 +24,16 @@ memorydock doctor
 
 See the [installation guide](docs/INSTALL.md) for Windows, macOS, Linux, client configuration, upgrades, and uninstalling. The [Chinese guide](docs/INSTALL.zh-CN.md) has the same steps.
 
+## Embedding providers
+
+`memorydock init` interactively configures the embedding provider:
+
+- **OpenAI** — base URL `https://api.openai.com/v1`, model `text-embedding-3-small` (1536 dimensions), with your API key.
+- **Ollama** — local, zero external calls: `ollama pull nomic-embed-text` (768 dimensions); the key can be any value.
+- **Any OpenAI-compatible endpoint** — your base URL, model, and its real dimension.
+
+`EMBEDDING_BASE_URL`, `EMBEDDING_API_KEY`, `EMBEDDING_MODEL`, and `EMBEDDING_DIM` override the saved configuration; `EMBEDDING_MAX_RETRIES` (default `3`) bounds retries. Switching to a model with a different dimension requires `memorydock reembed --yes --backup`. See the [installation guide](docs/INSTALL.md#embedding-provider-configuration) for the full configuration reference.
+
 ## What it does
 
 - Shares one local notebook between MCP clients through `search_memory`, `list_memories`, `propose_memory`, `push_memory`, and `update_memory`.

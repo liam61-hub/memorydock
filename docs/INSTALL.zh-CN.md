@@ -33,6 +33,37 @@ memorydock doctor
 
 运行 `memorydock serve`，然后打开 <http://127.0.0.1:40889/>。关闭运行该命令的终端会停止前台服务。MCP 客户端执行 `memorydock mcp` 时也可按需启动本地服务。
 
+## 向量模型配置
+
+`memorydock init` 会先发送测试请求，只有返回维度与所填一致时才把配置保存到 `~/.memorydock/config.json`。以下三种方案均已验证：
+
+| 提供方 | Base URL | 模型 | 维度 | API Key |
+| --- | --- | --- | --- | --- |
+| OpenAI | `https://api.openai.com/v1` | `text-embedding-3-small` | `1536` | 你的 OpenAI Key |
+| Ollama（本地） | `http://127.0.0.1:11434/v1` | `nomic-embed-text` | `768` | 任意值，如 `ollama` |
+| OpenAI 兼容服务 | 你的端点 | 你的模型 | 必须与模型一致 | 按服务要求 |
+
+使用 Ollama 前先执行 `ollama pull nomic-embed-text`；`bge-m3`（1024 维）也是常见选择。使用云端服务时，待向量化的文本会发送给该服务；使用 Ollama 可在本机完成计算。
+
+环境变量可以覆盖已保存的配置：
+
+| 变量 | 默认值 | 用途 |
+| --- | --- | --- |
+| `EMBEDDING_BASE_URL` | 已保存的值 | OpenAI 兼容端点 |
+| `EMBEDDING_API_KEY` | 已保存的值 | 服务方密钥；本地 Ollama 留空 |
+| `EMBEDDING_MODEL` | `text-embedding-3-small` | 模型名，Ollama 可填 `bge-m3` |
+| `EMBEDDING_DIM` | `1536` | 必须与模型实际输出维度一致 |
+| `EMBEDDING_MAX_RETRIES` | `3` | 向量请求重试次数 |
+| `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` | — | 可选，仅项目导入摘要使用 |
+
+已保存的维度必须与模型实际输出一致，不匹配时服务启动会报错。更换不同维度的模型前，先备份 `notes/`，再重建全部向量：
+
+```sh
+memorydock reembed --yes --backup
+```
+
+重建会先对所有笔记重新嵌入，再原子性替换索引；中途失败不会影响现有索引。
+
 ## 连接 MCP 客户端
 
 修改 MCP 配置后重启客户端。stdio 入口为安装后的 `memorydock mcp` 命令。

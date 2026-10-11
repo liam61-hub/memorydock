@@ -33,6 +33,37 @@ At `memorydock init`, choose `ollama`, `openai`, or `compatible`, then enter the
 
 Run `memorydock serve` to keep the service in a terminal and open <http://127.0.0.1:40889/>. Closing that terminal stops the foreground service. Connecting through `memorydock mcp` can start the local service on demand.
 
+## Embedding provider configuration
+
+`memorydock init` saves the provider settings to `~/.memorydock/config.json` only after a test request returns the dimension you entered. Three verified setups:
+
+| Provider | Base URL | Model | Dimension | API key |
+| --- | --- | --- | --- | --- |
+| OpenAI | `https://api.openai.com/v1` | `text-embedding-3-small` | `1536` | Your OpenAI key |
+| Ollama (local) | `http://127.0.0.1:11434/v1` | `nomic-embed-text` | `768` | Any value, e.g. `ollama` |
+| OpenAI-compatible | Your endpoint | Your model | Must match the model | Per provider |
+
+For Ollama, run `ollama pull nomic-embed-text` first; `bge-m3` (1024 dimensions) is another common local option. A hosted provider sees the text sent for embedding; Ollama keeps that calculation local.
+
+Environment variables override the saved configuration:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `EMBEDDING_BASE_URL` | saved value | OpenAI-compatible endpoint |
+| `EMBEDDING_API_KEY` | saved value | Provider key; leave empty for local Ollama |
+| `EMBEDDING_MODEL` | `text-embedding-3-small` | Model name, e.g. `bge-m3` for Ollama |
+| `EMBEDDING_DIM` | `1536` | Must match the model's output dimension |
+| `EMBEDDING_MAX_RETRIES` | `3` | Retries for embedding calls |
+| `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL` | — | Optional; summarization for project import only |
+
+The stored dimension must match the model's real output dimension — a mismatch is reported at startup. To switch to a model with a different dimension, back up `notes/` first, then rebuild every vector:
+
+```sh
+memorydock reembed --yes --backup
+```
+
+The rebuild re-embeds all notes before swapping the index atomically; a failure leaves the existing index untouched.
+
 ## Connect an MCP client
 
 Restart the client after changing its MCP configuration. The stdio entry point is the installed `memorydock mcp` command.

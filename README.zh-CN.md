@@ -24,6 +24,16 @@ memorydock doctor
 
 Windows、macOS、Linux 安装及各 Agent 的连接方法见[中文安装指南](docs/INSTALL.zh-CN.md)，英文版本见 [Installation](docs/INSTALL.md)。
 
+## 向量模型配置
+
+`memorydock init` 会交互式配置向量服务：
+
+- **OpenAI** — Base URL `https://api.openai.com/v1`，模型 `text-embedding-3-small`（1536 维），使用你的 API Key。
+- **Ollama** — 完全本地、零外部调用：`ollama pull nomic-embed-text`（768 维），Key 可填任意值。
+- **任意 OpenAI 兼容服务** — 填写你的 Base URL、模型及真实维度。
+
+`EMBEDDING_BASE_URL`、`EMBEDDING_API_KEY`、`EMBEDDING_MODEL`、`EMBEDDING_DIM` 可覆盖已保存的配置，`EMBEDDING_MAX_RETRIES`（默认 `3`）控制重试次数。更换不同维度的模型需执行 `memorydock reembed --yes --backup`。完整配置说明见[安装指南](docs/INSTALL.zh-CN.md#向量模型配置)。
+
 ## 主要功能
 
 - 通过 `search_memory`、`list_memories`、`propose_memory`、`push_memory` 和 `update_memory` 在多个 MCP 客户端之间共享记忆。
