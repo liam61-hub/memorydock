@@ -19,6 +19,6 @@ Keep changes focused. Add or update a test when behavior changes, and update bot
 
 ## Pull requests
 
-Describe the user-visible change, how you tested it, and any data migration or compatibility impact. The local edition should continue to bind to loopback and keep Markdown notes as the canonical data. CI must pass before review.
+Describe the user-visible change, how you tested it, and any data migration or compatibility impact. MemoryDock should continue to bind to loopback and keep Markdown notes as the canonical data. CI must pass before review.
 
 By submitting a contribution, you agree that it is licensed under this repository's [Apache-2.0 license](LICENSE).

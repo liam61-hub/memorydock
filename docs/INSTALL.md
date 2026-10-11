@@ -5,7 +5,7 @@
 ## Requirements
 
 - Windows, macOS, or Linux with Git, npm, and Node.js 22 or 24 LTS.
-- An embedding provider: local [Ollama](https://ollama.com/) or an OpenAI-compatible API. The local edition needs no MemoryDock account or token.
+- An embedding provider: local [Ollama](https://ollama.com/) or an OpenAI-compatible API. MemoryDock needs no account or token.
 
 For Ollama, pull an embedding model before setup:
 
@@ -15,7 +15,7 @@ ollama pull nomic-embed-text
 
 ## Build and install
 
-Run these commands in a terminal (PowerShell also accepts them). Do not copy a package name from an old npm registry listing: this project is currently distributed from GitHub source.
+Run these commands in a terminal (PowerShell also accepts them). The project is distributed from GitHub source.
 
 ```sh
 git clone https://github.com/liam61-hub/memorydock.git

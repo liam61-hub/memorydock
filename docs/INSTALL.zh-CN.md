@@ -5,7 +5,7 @@
 ## 安装条件
 
 - Windows、macOS 或 Linux；安装 Git、npm 和 Node.js 22 或 24 LTS。
-- 准备向量模型服务：本地 [Ollama](https://ollama.com/) 或 OpenAI 兼容 API。本地版不需要 MemoryDock 账号或令牌。
+- 准备向量模型服务：本地 [Ollama](https://ollama.com/) 或 OpenAI 兼容 API。MemoryDock 不需要账号或令牌。
 
 使用 Ollama 时，先拉取向量模型：
 
@@ -15,7 +15,7 @@ ollama pull nomic-embed-text
 
 ## 从源码构建并安装
 
-在终端运行以下命令，PowerShell 也可使用。当前通过 GitHub 源码分发，不要从旧 npm 仓库安装同名包。
+在终端运行以下命令，PowerShell 也可使用。项目通过 GitHub 源码分发。
 
 ```sh
 git clone https://github.com/liam61-hub/memorydock.git

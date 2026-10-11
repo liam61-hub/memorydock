@@ -4,7 +4,7 @@
 
 MemoryDock 是面向 AI Agent 的本地记忆工具。Codex、Claude Code、Cursor 等 MCP 客户端可以共享同一本存放在你电脑上的笔记。Agent 提议保存的记忆需要先由你在管理界面审核。Markdown 文件是原始数据，LanceDB 本地索引用于检索。
 
-本地版只服务于单台电脑，HTTP 服务仅监听回环地址，无需 MemoryDock 账号。向量计算可使用本地 Ollama，也可使用你自行配置的 OpenAI 兼容服务；使用云端向量服务时，待向量化的文本会发送给该服务。
+MemoryDock 只服务于单台电脑，HTTP 服务仅监听回环地址，无需任何账号。向量计算可使用本地 Ollama，也可使用你自行配置的 OpenAI 兼容服务；使用云端向量服务时，待向量化的文本会发送给该服务。
 
 ## 从 GitHub 安装
 
@@ -41,7 +41,7 @@ Windows、macOS、Linux 安装及各 Agent 的连接方法见[中文安装指南
 - 原始笔记保存在 `~/.memorydock/notes/`，可重建的检索索引保存在 `~/.memorydock/index/`。
 - 可用 `memorydock export <目录>` 导出 Markdown。
 
-MemoryDock 不录制完整对话。本地版没有账号服务、遥测或远程同步，面向单用户单机使用；请勿将无认证的 HTTP 服务暴露到网络。
+MemoryDock 不录制完整对话。它没有账号服务、遥测或远程同步，面向单用户单机使用；请勿将无认证的 HTTP 服务暴露到网络。
 
 ## 项目结构
 

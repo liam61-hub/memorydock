@@ -1,6 +1,6 @@
 # MemoryDock site
 
-This is a static English and Chinese product site for the open-source local edition. It has no build step, framework, webfonts, analytics, or third-party scripts. Its installation links point to [the GitHub repository](https://github.com/liam61-hub/memorydock).
+This is a static English and Chinese product site for MemoryDock. It has no build step, framework, webfonts, analytics, or third-party scripts. Its installation links point to [the GitHub repository](https://github.com/liam61-hub/memorydock).
 
 ## Files
 

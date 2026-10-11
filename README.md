@@ -4,7 +4,7 @@
 
 MemoryDock is local-first memory for AI agents. Codex, Claude Code, Cursor, and other MCP clients can search and save notes in one notebook on your computer. You review agent-proposed memories before they become searchable. Markdown files are the source of truth; a local LanceDB index supports search.
 
-The local edition runs on one computer, listens on loopback, and needs no MemoryDock account. Embeddings can run locally with Ollama or through an OpenAI-compatible provider you configure. Hosted embedding providers receive the text sent for embedding.
+MemoryDock runs on one computer, listens on loopback, and needs no account. Embeddings can run locally with Ollama or through an OpenAI-compatible provider you configure. Hosted embedding providers receive the text sent for embedding.
 
 ## Install from GitHub
 
@@ -41,7 +41,7 @@ See the [installation guide](docs/INSTALL.md) for Windows, macOS, Linux, client 
 - Stores canonical notes under `~/.memorydock/notes/` and a rebuildable search index under `~/.memorydock/index/`.
 - Offers Markdown export with `memorydock export <directory>`.
 
-MemoryDock does not record full conversations. The local edition has no account service, telemetry, or remote synchronization. It is intended for a single user on a single computer; do not expose its unauthenticated HTTP service to a network.
+MemoryDock does not record full conversations. It has no account service, telemetry, or remote synchronization. It is intended for a single user on a single computer; do not expose its unauthenticated HTTP service to a network.
 
 ## Project layout
 
