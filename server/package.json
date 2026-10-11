@@ -1,0 +1,75 @@
+{
+  "name": "memorydock",
+  "version": "2.0.0",
+  "description": "Local-first memory for AI agents with a web console and MCP adapter",
+  "author": "MemoryDock contributors",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/liam61-hub/memorydock#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liam61-hub/memorydock.git",
+    "directory": "server"
+  },
+  "bugs": "https://github.com/liam61-hub/memorydock/issues",
+  "type": "module",
+  "bin": {
+    "memorydock": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc",
+    "build:admin": "vite build --config admin/vite.config.ts",
+    "lint": "eslint . --max-warnings=0",
+    "prepack": "npm run build:admin && npm run build",
+    "typecheck": "tsc --project tsconfig.check.json && tsc --project admin/tsconfig.json",
+    "test": "vitest run",
+    "smoke:package": "node ../scripts/smoke-installed-package.mjs"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "keywords": [
+    "mcp",
+    "memory-system",
+    "ai-agent",
+    "memory",
+    "second-brain",
+    "local-first",
+    "embeddings",
+    "claude-code",
+    "codex"
+  ],
+  "dependencies": {
+    "@lancedb/lancedb": "^0.15.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "dompurify": "^3.4.15",
+    "dotenv": "^16.4.5",
+    "fastify": "^5.0.0",
+    "marked": "^18.0.13",
+    "pino": "^9.4.0",
+    "uuid": "^14.0.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^10.10.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.12.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.70.0",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
+  }
+}

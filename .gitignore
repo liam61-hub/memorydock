@@ -1,0 +1,40 @@
+# Node
+node_modules/
+dist/
+
+# Env & secrets
+.env
+
+# Data (LanceDB files, backups)
+data/
+
+# Logs
+*.log
+
+# Locally packed npm release artifacts
+*.tgz
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Cloudflare CLI state
+.wrangler/
+
+# Local Claude settings (shared project settings stay tracked)
+.claude/settings.local.json
+
+# Local env overrides
+.env*.local
+
+# Site smoke-test artifacts
+site/.smoke-*.png
+.playwright-mcp/
+
+# Isolated public repository snapshot
+.public-release/
+.npm-cache/

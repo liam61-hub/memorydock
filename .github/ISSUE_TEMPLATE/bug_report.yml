@@ -1,0 +1,32 @@
+name: Bug report
+description: Report a reproducible MemoryDock problem
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include the expected and actual behavior. Remove personal notes and secrets.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Provide a minimal sequence and relevant non-sensitive configuration.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: MemoryDock version
+      description: Output of memorydock --version
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Operating system and Node.js version
+    validations:
+      required: true

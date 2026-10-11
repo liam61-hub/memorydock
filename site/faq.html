@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="meta.faq.title">FAQ — MemoryDock</title>
+  <meta name="description" data-i18n-attr="content:meta.faq.desc" content="Pricing, privacy, bring-your-own-key, how MemoryDock compares to mem0 and Letta, roadmap, and compatibility.">
+  <meta property="og:title" content="FAQ — MemoryDock">
+  <meta property="og:description" content="Pricing, privacy, bring-your-own-key, comparisons, roadmap, and compatibility.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="common.skip">Skip to content</a>
+
+  <!-- ===== SHARED HEADER — keep in sync with index.html / quickstart.html / 404.html ===== -->
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html">
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.5" y="1.5" width="25" height="25" rx="6.5" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M8 9.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M8 13.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.45"/>
+          <circle cx="9.5" cy="18.5" r="2.4" fill="var(--accent)"/>
+          <path d="M14.5 18.5h5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/>
+        </svg>
+        <span>MemoryDock</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation" data-i18n-attr="aria-label:common.navlabel">
+        <a href="index.html" data-i18n="nav.home">Home</a>
+        <a href="quickstart.html" data-i18n="nav.quickstart">Quickstart</a>
+        <a href="faq.html" aria-current="page" data-i18n="nav.faq">FAQ</a>
+      </nav>
+      <!-- Language dropdown — options must stay in sync with LANGUAGES in js/i18n.js -->
+      <select class="lang-select" aria-label="Language / 语言">
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+      </select>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <h1>FAQ</h1>
+        <p class="lede" data-i18n="faq.lede">Straight answers about pricing, privacy, keys, and how MemoryDock compares to the alternatives.</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-block: 1.5rem 2rem;">
+      <div class="container">
+
+        <!-- ================= PRICING ================= -->
+        <div class="faq-group">
+          <h2 data-i18n="faq.gPricing">Pricing</h2>
+          <details>
+            <summary data-i18n="faq.q1">Is MemoryDock free?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a1">Yes. Local mode — everything that ships first — is free. A paid self-hosted licensed edition may come later; local mode stays free either way.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q2">Why give it away?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a2">Honestly: we'd rather build in public and learn what people actually need than guess behind a paywall. If the trial shows real demand, a self-hosted licensed edition is the plan — and existing local users lose nothing.</p>
+            </div>
+          </details>
+        </div>
+
+        <!-- ================= PRIVACY ================= -->
+        <div class="faq-group">
+          <h2 data-i18n="faq.gPrivacy">Privacy &amp; data</h2>
+          <details open>
+            <summary data-i18n="faq.q3">Where is my data stored?</summary>
+            <div class="faq-body">
+              <p data-i18n-html="faq.a3">In Markdown notes under <code>~/.memorydock/notes/</code> on your machine. The LanceDB search index is derived from those notes. MemoryDock has no cloud database or account.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q4">Does MemoryDock send my data anywhere?</summary>
+            <div class="faq-body">
+              <p data-i18n-html="faq.a4">Only to <em>your</em> embedding provider, using <em>your</em> key — because embeddings have to be computed somewhere. Pick Ollama and nothing leaves your machine at all. MemoryDock itself has no accounts, no telemetry, and no analytics.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q5">Can I delete everything?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a5">Export anything you want to keep, uninstall the program, then delete the local data folder. MemoryDock keeps no remote copy.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q6">Do you track this site?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a6">No analytics, cookies, trackers, or third-party scripts.</p>
+            </div>
+          </details>
+        </div>
+
+        <!-- ================= BYO KEY ================= -->
+        <div class="faq-group">
+          <h2 data-i18n="faq.gKey">Bring your own key</h2>
+          <details>
+            <summary data-i18n="faq.q7">Which embedding providers work?</summary>
+            <div class="faq-body">
+              <p data-i18n-html="faq.a7">Any OpenAI-compatible endpoint. Verified so far: OpenAI, together.ai, and Ollama (local). If it speaks the protocol, it should work — <a href="https://github.com/liam61-hub/memorydock/issues">tell us</a> if one doesn't.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q8">What if my model isn't 1536-dimensional?</summary>
+            <div class="faq-body">
+              <p data-i18n-html="faq.a8">Set <code>EMBEDDING_DIM</code> to whatever your model outputs. After switching models, run <code>memorydock reembed --yes --backup</code> to rebuild all vectors — the rebuild is atomic, so a failure leaves your data untouched. See <a href="quickstart.html#reembed">the quickstart</a>.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q9">Do I need an LLM key too?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a9">No. The LLM key is optional and used for exactly one feature: summarizing projects during import. Without it, MemoryDock falls back to a README snippet — everything else works.</p>
+            </div>
+          </details>
+        </div>
+
+        <!-- ================= COMPARED ================= -->
+        <div class="faq-group">
+          <h2 data-i18n="faq.gCompare">Compared with…</h2>
+          <p style="color: var(--ink-dim); font-size: 0.95rem; margin-bottom: 1rem;" data-i18n="faq.compareAsOf">As of September 2026. All of these are good tools — they optimize for different things.</p>
+          <div class="table-wrap">
+            <table class="compare">
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">MemoryDock</th>
+                  <th scope="col">mem0</th>
+                  <th scope="col">Letta</th>
+                  <th scope="col" data-i18n="faq.cBuiltin">Built-in agent memory</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-i18n="faq.cWhat">What it is</td>
+                  <td class="compare--self" data-i18n="faq.c1what">Local memory server for agents</td>
+                  <td data-i18n="faq.c2what">Memory layer for AI apps</td>
+                  <td data-i18n="faq.c3what">Stateful agent framework</td>
+                  <td data-i18n="faq.c4what">Per-product memory</td>
+                </tr>
+                <tr>
+                  <td data-i18n="faq.cWhere">Where data lives</td>
+                  <td class="compare--self" data-i18n="faq.c1where">Your disk</td>
+                  <td data-i18n="faq.c2where">Their cloud, or self-hosted OSS</td>
+                  <td data-i18n="faq.c3where">Your server</td>
+                  <td data-i18n="faq.c4where">The vendor's cloud</td>
+                </tr>
+                <tr>
+                  <td data-i18n="faq.cCross">Works across agent tools</td>
+                  <td class="compare--self ok" data-i18n="faq.c1cross">Yes — one MCP server, any client</td>
+                  <td data-i18n="faq.c2cross">Via their SDK</td>
+                  <td data-i18n="faq.c3cross">Via their SDK / API</td>
+                  <td class="faint" data-i18n="faq.c4cross">No — locked to one product</td>
+                </tr>
+                <tr>
+                  <td data-i18n="faq.cAccount">Account required</td>
+                  <td class="compare--self ok" data-i18n="faq.c1acc">No</td>
+                  <td class="warn" data-i18n="faq.c2acc">Yes (cloud)</td>
+                  <td data-i18n="faq.c3acc">No (self-host)</td>
+                  <td class="warn" data-i18n="faq.c4acc">Yes</td>
+                </tr>
+                <tr>
+                  <td data-i18n="faq.cExternal">External calls by default</td>
+                  <td class="compare--self ok" data-i18n="faq.c1ext">None with Ollama; BYO key otherwise</td>
+                  <td class="warn" data-i18n="faq.c2ext">Yes (cloud)</td>
+                  <td class="faint" data-i18n="faq.c3ext">Configurable</td>
+                  <td class="warn" data-i18n="faq.c4ext">Yes</td>
+                </tr>
+                <tr>
+                  <td data-i18n="faq.cSelf">Self-hostable</td>
+                  <td class="compare--self ok" data-i18n="faq.c1self">Yes — that's the whole point</td>
+                  <td class="ok" data-i18n="faq.c2self">Yes (OSS)</td>
+                  <td class="ok" data-i18n="faq.c3self">Yes</td>
+                  <td class="faint" data-i18n="faq.c4self">No</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="faq-note" data-i18n-html="faq.compareNote">If a comparison is inaccurate, tell us in <a href="https://github.com/liam61-hub/memorydock/issues">GitHub Issues</a>.</p>
+        </div>
+
+        <!-- ================= MULTI-AGENT ================= -->
+        <div class="faq-group">
+          <h2 data-i18n="faq.gMulti">Multi-agent &amp; sharing</h2>
+          <details>
+            <summary data-i18n="faq.q10">Can several agents share one memory?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a10">Yes — that's the core use case. One MemoryDock server on your machine, and every MCP client (Claude Code, Codex, Cursor, or anything else) reads and writes the same notebook.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q11">Can a teammate and I share a memory?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a11">Not in local mode — it's deliberately single-machine. Shared, cross-device memory is what the self-hosted edition is for; it's next on the roadmap.</p>
+            </div>
+          </details>
+        </div>
+
+        <!-- ================= ROADMAP ================= -->
+        <div class="faq-group">
+          <h2 data-i18n="faq.gRoadmap">Roadmap</h2>
+          <details>
+            <summary data-i18n="faq.q12">When can I self-host?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a12">We're testing the local edition first. If the trial shows demand, the self-hosted licensed edition — your server, your team, cross-device — is the next step.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q13">Will there be a cloud version?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a13">Maybe, much later, and always optional. Local-first is the identity, not a phase.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q14">How do I install MemoryDock?</summary>
+            <div class="faq-body">
+              <p data-i18n-html="faq.a14">Clone the <a href="https://github.com/liam61-hub/memorydock">GitHub repository</a> and follow the <a href="quickstart.html">source installation guide</a>. A public npm package is not available yet.</p>
+            </div>
+          </details>
+        </div>
+
+        <!-- ================= COMPATIBILITY ================= -->
+        <div class="faq-group">
+          <h2 data-i18n="faq.gCompat">Compatibility</h2>
+          <details>
+            <summary data-i18n="faq.q15">Which clients work?</summary>
+            <div class="faq-body">
+              <p data-i18n-html="faq.a15">Anything that speaks MCP. Tested so far: Claude Code, Codex CLI, and Cursor. If your client of choice misbehaves, that's a bug — <a href="https://github.com/liam61-hub/memorydock/issues">tell us</a>.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q16">Windows, macOS, Linux?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a16">Windows, macOS, and Linux are supported with Node.js 22 or 24 LTS. See the Windows MCP path guidance in the installation guide.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q17">Does it work offline?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a17">With Ollama, fully — server, embeddings, and agents can all run without any internet connection. With a hosted provider, only the embedding calls need the network.</p>
+            </div>
+          </details>
+        </div>
+
+        <!-- ================= MISC ================= -->
+        <div class="faq-group" style="margin-bottom: 0;">
+          <h2 data-i18n="faq.gMisc">Misc</h2>
+          <details>
+            <summary data-i18n="faq.q18">Is MemoryDock open source?</summary>
+            <div class="faq-body">
+              <p data-i18n="faq.a18">Yes. The local edition is available on GitHub under the Apache-2.0 license. Your notes remain your own Markdown files.</p>
+            </div>
+          </details>
+          <details>
+            <summary data-i18n="faq.q19">How do I report a bug or ask for something?</summary>
+            <div class="faq-body">
+              <p data-i18n-html="faq.a19">Open an issue in the <a href="https://github.com/liam61-hub/memorydock/issues">GitHub repository</a>. For vulnerabilities, follow its security policy instead of posting details publicly.</p>
+            </div>
+          </details>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= GITHUB ================= -->
+    <section class="section" id="github" style="padding-block: 2.5rem 4rem;">
+      <div class="container">
+        <h2 style="font-size: clamp(1.5rem, 3.4vw, 2.1rem);" data-i18n="github.h2">Get MemoryDock from GitHub.</h2>
+        <p class="lede" data-i18n="github.lede">Read the code, install locally, and share feedback with the project.</p>
+        <p><a class="btn btn--primary" href="https://github.com/liam61-hub/memorydock" data-i18n="github.cta">Open the repository</a></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== SHARED FOOTER — keep in sync with index.html / faq.html / 404.html ===== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="site-footer__grid">
+        <div>
+          <a class="brand" href="index.html" style="margin-bottom: 0.8rem;">
+            <svg width="22" height="22" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="1.5" y="1.5" width="25" height="25" rx="6.5" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M8 9.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="9.5" cy="18.5" r="2.4" fill="var(--accent)"/>
+            </svg>
+            <span>MemoryDock</span>
+          </a>
+          <p style="color: var(--ink-dim); font-size: 0.92rem; max-width: 22rem;" data-i18n="footer.tagline">Local-first memory for AI agents. Your notebook, your machine, your keys.</p>
+        </div>
+        <div>
+          <h2 data-i18n="footer.product">Product</h2>
+          <ul>
+            <li><a href="index.html#how" data-i18n="footer.how">How it works</a></li>
+            <li><a href="quickstart.html" data-i18n="nav.quickstart">Quickstart</a></li>
+            <li><a href="faq.html" data-i18n="nav.faq">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 data-i18n="footer.status">Status</h2>
+          <p class="footer-status" data-i18n-html="footer.statusLines">Open source on GitHub<br>Install from source</p>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        <span data-i18n="footer.trust">No fonts, trackers, or third-party scripts.</span>
+        <span data-i18n-html="footer.copyright">© <span data-year>2026</span> MemoryDock. Apache-2.0 licensed.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="meta.p404.title">404 — MemoryDock</title>
+  <meta name="description" data-i18n-attr="content:meta.p404.desc" content="Page not found.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="common.skip">Skip to content</a>
+
+  <!-- ===== SHARED HEADER — keep in sync with index.html / quickstart.html / faq.html ===== -->
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html">
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.5" y="1.5" width="25" height="25" rx="6.5" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M8 9.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M8 13.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.45"/>
+          <circle cx="9.5" cy="18.5" r="2.4" fill="var(--accent)"/>
+          <path d="M14.5 18.5h5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/>
+        </svg>
+        <span>MemoryDock</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation" data-i18n-attr="aria-label:common.navlabel">
+        <a href="index.html" data-i18n="nav.home">Home</a>
+        <a href="quickstart.html" data-i18n="nav.quickstart">Quickstart</a>
+        <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+      </nav>
+      <!-- Language dropdown — options must stay in sync with LANGUAGES in js/i18n.js -->
+      <select class="lang-select" aria-label="Language / 语言">
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+      </select>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="container p404">
+      <p class="p404__code" aria-hidden="true">404</p>
+      <h1 data-i18n="p404.h1">This page doesn't exist — but your memory does.</h1>
+      <p data-i18n="p404.p">Install from GitHub and your memory stays on your computer.</p>
+      <a class="btn btn--primary" href="index.html" data-i18n="p404.back">Back to MemoryDock</a>
+    </div>
+  </main>
+
+  <!-- ===== SHARED FOOTER — keep in sync with index.html / quickstart.html / faq.html ===== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="site-footer__grid">
+        <div>
+          <a class="brand" href="index.html" style="margin-bottom: 0.8rem;">
+            <svg width="22" height="22" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="1.5" y="1.5" width="25" height="25" rx="6.5" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M8 9.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="9.5" cy="18.5" r="2.4" fill="var(--accent)"/>
+            </svg>
+            <span>MemoryDock</span>
+          </a>
+          <p style="color: var(--ink-dim); font-size: 0.92rem; max-width: 22rem;" data-i18n="footer.tagline">Local-first memory for AI agents. Your notebook, your machine, your keys.</p>
+        </div>
+        <div>
+          <h2 data-i18n="footer.product">Product</h2>
+          <ul>
+            <li><a href="index.html#how" data-i18n="footer.how">How it works</a></li>
+            <li><a href="quickstart.html" data-i18n="nav.quickstart">Quickstart</a></li>
+            <li><a href="faq.html" data-i18n="nav.faq">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 data-i18n="footer.status">Status</h2>
+          <p class="footer-status" data-i18n-html="footer.statusLines">Open source on GitHub<br>Install from source</p>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        <span data-i18n="footer.trust">No fonts, trackers, or third-party scripts.</span>
+        <span data-i18n-html="footer.copyright">© <span data-year>2026</span> MemoryDock. Apache-2.0 licensed.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>

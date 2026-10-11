@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="meta.index.title">MemoryDock — Your memory belongs to you, not any single tool</title>
+  <meta name="description" data-i18n-attr="content:meta.index.desc" content="MemoryDock gives every AI agent on your machine one shared, private memory. Local-first, MCP-native, bring your own key. Free.">
+  <meta property="og:title" content="MemoryDock — Your memory belongs to you, not any single tool">
+  <meta property="og:description" content="One local notebook for every AI agent on your machine. Local-first, MCP-native, bring your own key.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="common.skip">Skip to content</a>
+
+  <!-- ===== SHARED HEADER — keep in sync with quickstart.html / faq.html / 404.html ===== -->
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html">
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.5" y="1.5" width="25" height="25" rx="6.5" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M8 9.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M8 13.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.45"/>
+          <circle cx="9.5" cy="18.5" r="2.4" fill="var(--accent)"/>
+          <path d="M14.5 18.5h5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/>
+        </svg>
+        <span>MemoryDock</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation" data-i18n-attr="aria-label:common.navlabel">
+        <a href="index.html" aria-current="page" data-i18n="nav.home">Home</a>
+        <a href="quickstart.html" data-i18n="nav.quickstart">Quickstart</a>
+        <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+      </nav>
+      <!-- Language dropdown — options must stay in sync with LANGUAGES in js/i18n.js -->
+      <select class="lang-select" aria-label="Language / 语言">
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+      </select>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+      <div class="container hero__inner">
+        <div class="hero__copy">
+          <div class="badge-row" aria-label="Status">
+            <span class="badge badge--now"><span class="badge__dot" aria-hidden="true"></span><span data-i18n="hero.badge1">Local-first</span></span>
+            <span class="badge"><span data-i18n="hero.badge2">MCP-native</span></span>
+            <span class="badge"><span data-i18n="hero.badge3">Free</span></span>
+          </div>
+          <h1 data-i18n-html="hero.h1">Your memory belongs to <em>you</em>, not any single tool.</h1>
+          <p class="lede" data-i18n="hero.lede">MemoryDock gives every AI agent on your machine one shared memory. Claude Code, Codex, and Cursor read and write the same notes on your disk. No MemoryDock account or cloud service. Choose a local or hosted embedding provider.</p>
+          <div class="hero__ctas">
+            <a class="btn btn--primary" href="https://github.com/liam61-hub/memorydock" data-i18n="hero.cta1">View on GitHub</a>
+            <a class="btn btn--ghost" href="quickstart.html" data-i18n="hero.cta2">See how it works</a>
+          </div>
+          <p class="hero__status" role="status" data-i18n="hero.status">Open source on GitHub — install from source</p>
+        </div>
+
+        <div class="hero__card">
+          <div class="code-block">
+            <div class="code-block__bar">
+              <span class="code-block__label">MCP client config</span>
+              <a href="https://github.com/liam61-hub/memorydock" class="code-block__soon">GitHub</a>
+            </div>
+            <pre><code>{
+  "mcpServers": {
+    "memorydock": {
+      "command": "memorydock",
+      "args": ["mcp"]
+    }
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= WHY ================= -->
+    <section class="section" id="why">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">01</span>
+          <h2 data-i18n="why.head">Every tool remembers — separately.</h2>
+        </div>
+
+        <div class="card-grid">
+          <div class="card card--pain">
+            <span class="card__mark" aria-hidden="true" data-i18n="why.p1mark">// pain #1</span>
+            <h3 data-i18n="why.p1h">Your agents forget each other</h3>
+            <p data-i18n="why.p1">Claude Code learns something on Monday; by Thursday, Cursor starts from zero. Every session begins with amnesia, and every tool has its own.</p>
+          </div>
+          <div class="card card--pain">
+            <span class="card__mark" aria-hidden="true" data-i18n="why.p2mark">// pain #2</span>
+            <h3 data-i18n="why.p2h">Your memory lives in someone else's cloud</h3>
+            <p data-i18n="why.p2">Conversations, decisions, context — they pile up in vendor silos you can't read, export, or delete on your own terms.</p>
+          </div>
+          <div class="card card--pain">
+            <span class="card__mark" aria-hidden="true" data-i18n="why.p3mark">// pain #3</span>
+            <h3 data-i18n="why.p3h">Your notes aren't agent-readable</h3>
+            <p data-i18n="why.p3">You can write things down, but no file of notes answers a question mid-task. Agents need memory they can query.</p>
+          </div>
+        </div>
+
+        <p class="answer-line" data-i18n-html="why.answer"><strong>One notebook, on your machine, spoken over MCP.</strong> That's MemoryDock.</p>
+      </div>
+    </section>
+
+    <!-- ================= MODES ================= -->
+    <section class="section" id="modes">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">02</span>
+          <h2 data-i18n="modes.head">Start local. Grow on your terms.</h2>
+        </div>
+
+        <div class="modes">
+          <div class="mode mode--now">
+            <div class="mode__top">
+              <h3 data-i18n="modes.1h">Local</h3>
+              <span class="badge badge--now"><span class="badge__dot" aria-hidden="true"></span><span data-i18n="modes.1badge">Now</span></span>
+            </div>
+            <p data-i18n="modes.1">One machine, all your agents, files you own. This is what ships first.</p>
+            <span class="mode__arrow" aria-hidden="true">→</span>
+          </div>
+          <div class="mode">
+            <div class="mode__top">
+              <h3 data-i18n="modes.2h">Self-hosted</h3>
+              <span class="badge badge--next"><span data-i18n="modes.2badge">Next</span></span>
+            </div>
+            <p data-i18n="modes.2">Your server, your rules. Cross-device, shared with your team.</p>
+            <span class="mode__arrow" aria-hidden="true">→</span>
+          </div>
+          <div class="mode">
+            <div class="mode__top">
+              <h3 data-i18n="modes.3h">Cloud</h3>
+              <span class="badge badge--later"><span data-i18n="modes.3badge">Later</span></span>
+            </div>
+            <p data-i18n="modes.3">Optional official hosting. Only if you want it — never a requirement.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= FEATURES ================= -->
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">03</span>
+          <h2 data-i18n="features.head">Built like a tool, not a platform.</h2>
+        </div>
+
+        <div class="card-grid">
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">▣</span>
+            <h3 data-i18n="features.1h">Local-first by default</h3>
+            <p data-i18n="features.1">Markdown notes stay on your disk. A local LanceDB index makes them searchable.</p>
+          </div>
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">⚿</span>
+            <h3 data-i18n="features.2h">Bring your own key</h3>
+            <p data-i18n="features.2">OpenAI, together.ai, or Ollama for zero external calls. We never see your data.</p>
+          </div>
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">⇄</span>
+            <h3 data-i18n="features.3h">One memory, many agents</h3>
+            <p data-i18n="features.3">Any MCP client reads and writes the same notebook. No per-tool silos.</p>
+          </div>
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">⌕</span>
+            <h3 data-i18n="features.4h">Search that behaves like memory</h3>
+            <p data-i18n="features.4">Hybrid semantic + keyword retrieval, with long content chunked so details stay findable.</p>
+          </div>
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">∅</span>
+            <h3 data-i18n="features.5h">No account, no lock-in</h3>
+            <p data-i18n="features.5">No signup, no subscription, no export traps. Plain local files you already own.</p>
+          </div>
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">$0</span>
+            <h3 data-i18n="features.6h">Free while we build</h3>
+            <p data-i18n="features.6">Tools are free. Paid self-hosted licensing comes later, if the market wants it.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= HOW ================= -->
+    <section class="section" id="how">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">04</span>
+          <h2 data-i18n="how.head">Three steps to a shared memory.</h2>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <h3 data-i18n="how.1h">Run the server</h3>
+            <p data-i18n="how.1">One command on your machine. It creates a local notebook under ~/.memorydock — Markdown notes plus a rebuildable search index.</p>
+          </div>
+          <div class="step">
+            <h3 data-i18n="how.2h">Point your agents at it</h3>
+            <p data-i18n="how.2">A few lines of MCP config per client. The same notebook for every tool you use.</p>
+          </div>
+          <div class="step">
+            <h3 data-i18n="how.3h">Tell it to remember</h3>
+            <p data-i18n="how.3">Your agent saves what matters. Later, any agent can ask and get answers.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= INSTALL ================= -->
+    <section class="section" id="install">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">05</span>
+          <h2 data-i18n="install.head">Install from GitHub source.</h2>
+        </div>
+
+        <div class="code-block" style="max-width: 44rem;">
+          <div class="code-block__bar">
+            <span class="code-block__label">terminal</span>
+            <a href="https://github.com/liam61-hub/memorydock" class="code-block__soon">GitHub</a>
+          </div>
+          <pre><code>git clone https://github.com/liam61-hub/memorydock.git
+cd memorydock/server
+npm ci && npm pack
+npm install -g ./memorydock-2.0.0.tgz
+memorydock init</code></pre>
+        </div>
+
+        <p class="lede" style="margin-top: 1.6rem;" data-i18n-html="install.after">The full walkthrough — every client, every provider — is on the <a href="quickstart.html">quickstart page</a>.</p>
+      </div>
+    </section>
+
+    <!-- ================= COMPARE TEASER ================= -->
+    <section class="section" style="padding-block: 0 1rem;">
+      <div class="container">
+        <p class="lede" data-i18n-html="compare.teaser">How is this different from mem0, Letta, or your agent's built-in memory? <a href="faq.html">Read the FAQ →</a></p>
+      </div>
+    </section>
+
+    <!-- ================= GITHUB ================= -->
+    <section class="section" id="github" style="padding-block: 2.5rem 4rem;">
+      <div class="container">
+        <h2 style="font-size: clamp(1.5rem, 3.4vw, 2.1rem);" data-i18n="github.h2">Get MemoryDock from GitHub.</h2>
+        <p class="lede" data-i18n="github.lede">Read the code, install locally, and share feedback with the project.</p>
+        <p><a class="btn btn--primary" href="https://github.com/liam61-hub/memorydock" data-i18n="github.cta">Open the repository</a></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== SHARED FOOTER — keep in sync with quickstart.html / faq.html / 404.html ===== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="site-footer__grid">
+        <div>
+          <a class="brand" href="index.html" style="margin-bottom: 0.8rem;">
+            <svg width="22" height="22" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="1.5" y="1.5" width="25" height="25" rx="6.5" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M8 9.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="9.5" cy="18.5" r="2.4" fill="var(--accent)"/>
+            </svg>
+            <span>MemoryDock</span>
+          </a>
+          <p style="color: var(--ink-dim); font-size: 0.92rem; max-width: 22rem;" data-i18n="footer.tagline">Local-first memory for AI agents. Your notebook, your machine, your keys.</p>
+        </div>
+        <div>
+          <h2 data-i18n="footer.product">Product</h2>
+          <ul>
+            <li><a href="index.html#how" data-i18n="footer.how">How it works</a></li>
+            <li><a href="quickstart.html" data-i18n="nav.quickstart">Quickstart</a></li>
+            <li><a href="faq.html" data-i18n="nav.faq">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 data-i18n="footer.status">Status</h2>
+          <p class="footer-status" data-i18n-html="footer.statusLines">Open source on GitHub<br>Install from source</p>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        <span data-i18n="footer.trust">No fonts, trackers, or third-party scripts.</span>
+        <span data-i18n-html="footer.copyright">© <span data-year>2026</span> MemoryDock. Apache-2.0 licensed.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>

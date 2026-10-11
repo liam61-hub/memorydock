@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="meta.qs.title">Quickstart — MemoryDock</title>
+  <meta name="description" data-i18n-attr="content:meta.qs.desc" content="Run MemoryDock locally, point it at your own embedding provider, and share one memory across Claude Code, Codex, Cursor and any MCP client.">
+  <meta property="og:title" content="Quickstart — MemoryDock">
+  <meta property="og:description" content="Run MemoryDock locally, point it at your own embedding provider, and share one memory across every agent on your machine.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="common.skip">Skip to content</a>
+
+  <!-- ===== SHARED HEADER — keep in sync with index.html / faq.html / 404.html ===== -->
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="index.html">
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="1.5" y="1.5" width="25" height="25" rx="6.5" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M8 9.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M8 13.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.45"/>
+          <circle cx="9.5" cy="18.5" r="2.4" fill="var(--accent)"/>
+          <path d="M14.5 18.5h5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.55"/>
+        </svg>
+        <span>MemoryDock</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation" data-i18n-attr="aria-label:common.navlabel">
+        <a href="index.html" data-i18n="nav.home">Home</a>
+        <a href="quickstart.html" aria-current="page" data-i18n="nav.quickstart">Quickstart</a>
+        <a href="faq.html" data-i18n="nav.faq">FAQ</a>
+      </nav>
+      <!-- Language dropdown — options must stay in sync with LANGUAGES in js/i18n.js -->
+      <select class="lang-select" aria-label="Language / 语言">
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+      </select>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="container">
+        <h1 data-i18n="qs.h1">Quickstart</h1>
+        <p class="lede" data-i18n="qs.lede">Run MemoryDock locally, point it at your own embedding provider, and share it with every agent on your machine.</p>
+        <div class="callout callout--warn" style="margin-top: 1.6rem; max-width: 46rem;">
+          <p data-i18n-html="qs.calloutTop"><strong>MemoryDock is open source on GitHub.</strong> Install from source with the commands below. See the <a href="https://github.com/liam61-hub/memorydock/blob/main/docs/INSTALL.md">full installation guide</a> for platform-specific MCP setup.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= BEFORE YOU START ================= -->
+    <section class="section" style="padding-block: 1rem 0;">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">01</span>
+          <h2 data-i18n="qs.beforeHead">Before you start</h2>
+        </div>
+        <div class="card-grid">
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">⛭</span>
+            <h3 data-i18n="qs.before1h">Node.js 22 or 24 LTS, npm, and Git</h3>
+            <p data-i18n="qs.before1">Clone the GitHub repository, build a local package, and install it globally.</p>
+          </div>
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">⚿</span>
+            <h3 data-i18n="qs.before2h">An embeddings endpoint</h3>
+            <p data-i18n="qs.before2">Any OpenAI-compatible API. Or a local Ollama model — zero external calls.</p>
+          </div>
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">◷</span>
+            <h3 data-i18n="qs.before3h">About five minutes</h3>
+            <p data-i18n="qs.before3">Start the server, paste three blocks of config, ask your agent to remember something.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PROVIDER ================= -->
+    <section class="section" style="padding-block: 2.5rem 0;">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">02</span>
+          <h2 data-i18n="qs.providerHead">Pick your embedding provider</h2>
+        </div>
+
+        <div class="card-grid">
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">◉</span>
+            <h3>OpenAI</h3>
+            <p data-i18n="qs.prov1">The default. One key, one model, done.</p>
+            <span class="provider__meta">
+              <b data-i18n="qs.provBase">Base URL</b> https://api.openai.com/v1<br>
+              <b data-i18n="qs.provModel">Model</b> text-embedding-3-small<br>
+              <b data-i18n="qs.provDim">Dimension</b> 1536
+            </span>
+          </div>
+          <div class="card" style="border-color: color-mix(in srgb, var(--accent) 55%, var(--line));">
+            <span class="card__mark" aria-hidden="true">◌</span>
+            <h3 data-i18n="qs.prov2h">Ollama — zero external calls</h3>
+            <p data-i18n="qs.prov2">Fully local. Nothing leaves your machine, ever.</p>
+            <span class="provider__meta">
+              <b data-i18n="qs.provPull">Pull</b> ollama pull bge-m3<br>
+              <b data-i18n="qs.provBase">Base URL</b> http://localhost:11434/v1<br>
+              <b data-i18n="qs.provKey">Key</b> <span data-i18n="qs.provKeyVal">ollama (any value)</span><br>
+              <b data-i18n="qs.provDim">Dimension</b> 1024
+            </span>
+          </div>
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">⋯</span>
+            <h3 data-i18n="qs.prov3h">Any OpenAI-compatible</h3>
+            <p data-i18n="qs.prov3">together.ai, your company gateway, whatever speaks the protocol.</p>
+            <span class="provider__meta">
+              <b data-i18n="qs.provBase">Base URL</b> <span data-i18n="qs.provYours">yours</span><br>
+              <b data-i18n="qs.provModel">Model</b> <span data-i18n="qs.provYours">yours</span><br>
+              <b data-i18n="qs.provDim">Dimension</b> <span data-i18n="qs.provDimMatch">must match the model</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="callout callout--warn" style="margin-top: 1.4rem; max-width: 46rem;">
+          <p data-i18n-html="qs.dimWarn"><strong>The dimension must match your model.</strong> A mismatch is caught at startup with a clear error pointing you at the reembed command — see <a href="#reembed">Changing models</a> below.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= STEP 1 ================= -->
+    <section class="section" style="padding-block: 2.5rem 0;">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">03</span>
+          <h2 data-i18n="qs.step1Head">Step 1 — Start the server</h2>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: repeat(auto-fill, minmax(min(24rem, 100%), 1fr));">
+          <div class="code-block">
+            <div class="code-block__bar">
+              <span class="code-block__label">GitHub source</span>
+            </div>
+            <pre><code>git clone https://github.com/liam61-hub/memorydock.git
+cd memorydock/server
+npm ci
+npm pack
+npm install -g ./memorydock-2.0.0.tgz</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block__bar">
+              <span class="code-block__label">Start</span>
+            </div>
+            <pre><code>memorydock init
+memorydock doctor
+memorydock serve</code></pre>
+          </div>
+        </div>
+
+        <div class="callout callout--ok" style="margin-top: 1.4rem; max-width: 46rem;">
+          <p data-i18n-html="qs.keyNote"><strong>No MemoryDock account or token.</strong> The service binds to loopback and stores notes under <code>~/.memorydock</code>. A hosted embedding provider may require its own API key.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= STEP 2 ================= -->
+    <section class="section" style="padding-block: 2.5rem 0;">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">04</span>
+          <h2 data-i18n="qs.step2Head">Step 2 — Connect your agents</h2>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: repeat(auto-fill, minmax(min(24rem, 100%), 1fr));">
+          <div class="code-block">
+            <div class="code-block__bar">
+              <span class="code-block__label">~/.claude.json (user scope)</span>
+              <button class="copy-btn" type="button" data-i18n="common.copy">Copy</button>
+            </div>
+            <pre><code>{
+  "mcpServers": {
+    "memorydock": {
+      "type": "stdio",
+      "command": "memorydock",
+      "args": ["mcp"]
+    }
+  }
+}</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block__bar">
+              <span class="code-block__label">~/.codex/config.toml</span>
+              <button class="copy-btn" type="button" data-i18n="common.copy">Copy</button>
+            </div>
+            <pre><code>[mcp_servers.memorydock]
+command = "memorydock"
+args = ["mcp"]
+default_tools_approval_mode = "approve"
+startup_timeout_sec = 10
+tool_timeout_sec = 60</code></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-block__bar">
+              <span class="code-block__label" data-i18n="qs.cursorLabel">Cursor → Settings → MCP</span>
+              <button class="copy-btn" type="button" data-i18n="common.copy">Copy</button>
+            </div>
+            <pre><code>{
+  "mcpServers": {
+    "memorydock": {
+      "command": "memorydock",
+      "args": ["mcp"]
+    }
+  }
+}</code></pre>
+          </div>
+          <div class="card" style="display: flex; flex-direction: column; gap: 0.9rem; justify-content: center;">
+            <div class="callout callout--warn">
+              <p data-i18n-html="qs.npxWarn"><strong>Install globally and use the bare command.</strong> <code>npx</code> re-resolves the registry on every cold start — a known cause of flaky MCP connections.</p>
+            </div>
+            <div class="callout callout--warn">
+              <p data-i18n-html="qs.reconnect"><strong>Restart your client session after changing config.</strong> Use the client's MCP tool list to verify the connection.</p>
+            </div>
+            <div class="callout callout--ok">
+              <p data-i18n-html="qs.anyClient"><strong>Works with stdio MCP clients.</strong> The examples all launch the installed <code>memorydock mcp</code> command.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= STEP 3 ================= -->
+    <section class="section" style="padding-block: 2.5rem 0;">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">05</span>
+          <h2 data-i18n="qs.step3Head">Step 3 — Verify</h2>
+        </div>
+
+        <div class="code-block" style="max-width: 44rem;">
+          <div class="code-block__bar">
+            <span class="code-block__label">terminal</span>
+            <button class="copy-btn" type="button" data-i18n="common.copy">Copy</button>
+          </div>
+          <pre><code>curl http://127.0.0.1:40889/health</code></pre>
+        </div>
+
+        <p class="lede" style="margin-top: 1.4rem;" data-i18n="qs.ask">Then ask your agent:</p>
+        <div class="steps" style="margin-top: 1rem;">
+          <div class="step">
+            <h3 data-i18n="qs.ask1h">Save something</h3>
+            <p data-i18n="qs.ask1">"Save this to my memory: the staging deploy uses Node 20, not 22."</p>
+          </div>
+          <div class="step">
+            <h3 data-i18n="qs.ask2h">Recall it from another tool</h3>
+            <p data-i18n="qs.ask2">"Search my memory for which Node version staging uses."</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TOOLS ================= -->
+    <section class="section" style="padding-block: 2.5rem 0;">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">06</span>
+          <h2 data-i18n="qs.toolsHead">What your agents get</h2>
+        </div>
+
+        <h3 style="font-size: 1.05rem; margin-bottom: 0.8rem;" data-i18n="qs.toolsSub">Tools</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th data-i18n="qs.colTool">Tool</th><th data-i18n="qs.colWhat">What it does</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>search_memory</code></td><td data-i18n="qs.t1">Semantic + keyword hybrid search across your memory</td></tr>
+              <tr><td><code>list_memories</code></td><td data-i18n="qs.t9">List approved memories in pages</td></tr>
+              <tr><td><code>propose_memory</code></td><td data-i18n="qs.t8">Propose a memory for human review (pending until approved)</td></tr>
+              <tr><td><code>push_memory</code></td><td data-i18n="qs.t2">Store content (upsert, deduplicated by title)</td></tr>
+              <tr><td><code>update_memory</code></td><td data-i18n="qs.t3">Update an existing entry, with safe append</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= ENV VARS ================= -->
+    <section class="section" style="padding-block: 2.5rem 0;">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">07</span>
+          <h2 data-i18n="qs.envHead">Environment variables</h2>
+        </div>
+
+        <h3 style="font-size: 1.05rem; margin-bottom: 0.8rem;" data-i18n-html="qs.envServerSub">Server (<code>.env</code>)</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th data-i18n="qs.colVar">Variable</th><th data-i18n="qs.colDefault">Default</th><th data-i18n="qs.colNotes">Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>HOST</code> / <code>PORT</code></td><td><code>127.0.0.1</code> / <code>40889</code></td><td data-i18n="qs.e1">Keep localhost for single-machine use</td></tr>
+              <tr><td><code>MEMORYDOCK_HOME</code></td><td><code>~/.memorydock</code></td><td data-i18n="qs.e2">Per-user data root (config, notes, index, backups)</td></tr>
+              <tr><td><code>MEMORYDOCK_INDEX_PATH</code></td><td><code>&lt;home&gt;/index</code></td><td data-i18n="qs.e3">LanceDB index directory</td></tr>
+              <tr><td><code>MEMORYDOCK_NOTES_PATH</code></td><td><code>&lt;home&gt;/notes</code></td><td data-i18n="qs.e4">Canonical Markdown notes</td></tr>
+              <tr><td><code>EMBEDDING_BASE_URL</code></td><td>—</td><td data-i18n-html="qs.e5"><span class="warn">Required for search</span> — OpenAI-compatible endpoint</td></tr>
+              <tr><td><code>EMBEDDING_API_KEY</code></td><td>—</td><td data-i18n-html="qs.e6">Provider key when required; leave empty for local Ollama</td></tr>
+              <tr><td><code>EMBEDDING_MODEL</code></td><td><code>text-embedding-3-small</code></td><td data-i18n-html="qs.e7">e.g. <code>bge-m3</code> for Ollama</td></tr>
+              <tr><td><code>EMBEDDING_DIM</code></td><td><code>1536</code></td><td data-i18n="qs.e8">Must match the model's output dimension</td></tr>
+              <tr><td><code>EMBEDDING_MAX_RETRIES</code></td><td><code>3</code></td><td data-i18n="qs.e9">Retries for embedding calls</td></tr>
+              <tr><td><code>LLM_API_KEY</code> / <code>LLM_BASE_URL</code> / <code>LLM_MODEL</code></td><td>—</td><td data-i18n="qs.e10">Optional — project-import summaries only</td></tr>
+              <tr><td><code>LOG_LEVEL</code></td><td><code>info</code></td><td data-i18n="qs.e12">Pino log level</td></tr>
+              <tr><td><code>SKIP_STARTUP_CHECKS</code></td><td>—</td><td data-i18n-html="qs.e13">Set <code>true</code> to skip startup probes</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="font-size: 1.05rem; margin: 1.8rem 0 0.8rem;" data-i18n="qs.envMcpSub">MCP client</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th data-i18n="qs.colVar">Variable</th><th data-i18n="qs.colDefault">Default</th><th data-i18n="qs.colNotes">Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>MEMORYDOCK_API_URL</code></td><td><code>http://127.0.0.1:40889</code></td><td data-i18n="qs.m1">MemoryDock server URL</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= REEMBED ================= -->
+    <section class="section" style="padding-block: 2.5rem 0;">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">08</span>
+          <h2 id="reembed" data-i18n="qs.reembedHead">Changing embedding models</h2>
+        </div>
+
+        <p class="lede" data-i18n="qs.reembedIntro">Switching to a model with a different dimension rebuilds every vector. Backup first, rebuild atomically — if it fails midway, your existing data is untouched.</p>
+
+        <div class="code-block" style="max-width: 44rem; margin-top: 1.4rem;">
+          <div class="code-block__bar">
+            <span class="code-block__label">terminal</span>
+            <button class="copy-btn" type="button" data-i18n="common.copy">Copy</button>
+          </div>
+          <pre><code>memorydock reembed --yes --backup   # backup to ~/.memorydock/backups, then rebuild</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= DATA ================= -->
+    <section class="section" style="padding-block: 2.5rem 0;">
+      <div class="container">
+        <div class="section-head">
+          <span class="section-head__num">09</span>
+          <h2 data-i18n="qs.dataHead">Where your data lives</h2>
+        </div>
+
+        <div class="card-grid">
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">▤</span>
+            <h3><code style="font-size: 0.85rem;">~/.memorydock/index</code></h3>
+            <p data-i18n="qs.data1">The rebuildable LanceDB search index — derived from your notes.</p>
+          </div>
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">⧉</span>
+            <h3><code style="font-size: 0.85rem;">~/.memorydock/backups</code></h3>
+            <p data-i18n-html="qs.data2">Rolling <code>memory-*.tar.gz</code> backups, plus anything from <code>reembed --backup</code>.</p>
+          </div>
+          <div class="card">
+            <span class="card__mark" aria-hidden="true">⚿</span>
+            <h3><code style="font-size: 0.85rem;">~/.memorydock/notes</code></h3>
+            <p data-i18n="qs.data3">Canonical Markdown notes — the source of truth. Backing up is copying the folder. Erasing everything is deleting it.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= GITHUB ================= -->
+    <section class="section" id="github" style="padding-block: 2.5rem 4rem;">
+      <div class="container">
+        <h2 style="font-size: clamp(1.5rem, 3.4vw, 2.1rem);" data-i18n="github.h2">Get MemoryDock from GitHub.</h2>
+        <p class="lede" data-i18n="github.lede">Read the code, install locally, and share feedback with the project.</p>
+        <p><a class="btn btn--primary" href="https://github.com/liam61-hub/memorydock" data-i18n="github.cta">Open the repository</a></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== SHARED FOOTER — keep in sync with index.html / faq.html / 404.html ===== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="site-footer__grid">
+        <div>
+          <a class="brand" href="index.html" style="margin-bottom: 0.8rem;">
+            <svg width="22" height="22" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="1.5" y="1.5" width="25" height="25" rx="6.5" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M8 9.5h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="9.5" cy="18.5" r="2.4" fill="var(--accent)"/>
+            </svg>
+            <span>MemoryDock</span>
+          </a>
+          <p style="color: var(--ink-dim); font-size: 0.92rem; max-width: 22rem;" data-i18n="footer.tagline">Local-first memory for AI agents. Your notebook, your machine, your keys.</p>
+        </div>
+        <div>
+          <h2 data-i18n="footer.product">Product</h2>
+          <ul>
+            <li><a href="index.html#how" data-i18n="footer.how">How it works</a></li>
+            <li><a href="quickstart.html" data-i18n="nav.quickstart">Quickstart</a></li>
+            <li><a href="faq.html" data-i18n="nav.faq">FAQ</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 data-i18n="footer.status">Status</h2>
+          <p class="footer-status" data-i18n-html="footer.statusLines">Open source on GitHub<br>Install from source</p>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        <span data-i18n="footer.trust">No fonts, trackers, or third-party scripts.</span>
+        <span data-i18n-html="footer.copyright">© <span data-year>2026</span> MemoryDock. Apache-2.0 licensed.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script defer src="js/i18n.js"></script>
+  <script defer src="js/main.js"></script>
+</body>
+</html>
