@@ -12,9 +12,9 @@ git clone https://github.com/liam61-hub/memorydock.git
 cd memorydock/server
 npm ci
 npm pack
-npm install -g ./memorydock-2.0.0.tgz
+npm install -g ./memorydock-2.1.0.tgz
 memorydock init
-memorydock serve
+memorydock service install  # Windows, run once in a normal user PowerShell
 ```
 
 Use the filename printed by `npm pack` if the package version changes. See
@@ -32,8 +32,11 @@ hierarchy, and export the Markdown source of truth.
 
 ## MCP client configuration
 
-Point an MCP client at the installed command. `memorydock mcp` starts the
-loopback Web service when it is not already running:
+Point an MCP client at the installed command. After the MCP connection is
+established, it starts the loopback Web service in the background if needed.
+On Windows the service is launched by the user-owned scheduled task installed
+above, so it does not inherit an agent sandbox. The task has no automatic time
+or logon trigger and allows only one running instance:
 
 ```json
 {
@@ -60,6 +63,8 @@ after changing MCP configuration.
 | `memorydock init` | Configure and verify embeddings interactively. |
 | `memorydock serve` | Start the loopback API and management console. |
 | `memorydock mcp` | Run the stdio MCP adapter. |
+| `memorydock service install` | Register the Windows user task for background startup. |
+| `memorydock service remove` | Remove the Windows user task. |
 | `memorydock doctor` | Show safe configuration and storage diagnostics. |
 | `memorydock export <directory>` | Copy Markdown notes to a portable directory. |
 | `memorydock rebuild-notes --yes` | Create Markdown mirrors for existing index entries. |
@@ -82,7 +87,15 @@ All data lives under one per-user root: `~/.memorydock`
 Optional overrides: `MEMORYDOCK_HOME` (data root), `MEMORYDOCK_CONFIG_PATH`,
 `MEMORYDOCK_NOTES_PATH`, `MEMORYDOCK_INDEX_PATH`. All paths are absolute and
 independent of the working directory. There are no legacy environment
-variables in 2.0.
+variables in 2.x.
+
+On Windows, the scheduled task has its own environment. If you use custom
+`MEMORYDOCK_*` paths, `PORT`, `HOST`, or embedding overrides, start
+`memorydock serve` yourself from an environment with the same settings.
+`MEMORYDOCK_LAUNCH_MODE=off` disables
+background launch; `direct` permits the older child-process launch, which can
+inherit an agent sandbox. The default is `task` on Windows and `direct` on
+macOS/Linux.
 
 `EMBEDDING_BASE_URL`, `EMBEDDING_API_KEY`, `EMBEDDING_MODEL`, and
 `EMBEDDING_DIM` override the saved embedding configuration.

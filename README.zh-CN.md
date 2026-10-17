@@ -15,12 +15,12 @@ git clone https://github.com/liam61-hub/memorydock.git
 cd memorydock/server
 npm ci
 npm pack
-npm install -g ./memorydock-2.0.0.tgz
+npm install -g ./memorydock-2.1.0.tgz
 memorydock init
 memorydock doctor
 ```
 
-`npm pack` 会输出实际生成的文件名；版本不同时，请在安装命令中使用该文件名。`memorydock init` 会先验证向量服务，再保存配置。运行 `memorydock serve` 后可打开 <http://127.0.0.1:40889/>。MCP 客户端启动 `memorydock mcp` 时也会按需启动本地服务。
+`npm pack` 会输出实际生成的文件名；版本不同时，请在安装命令中使用该文件名。`memorydock init` 会先验证向量服务，再保存配置。Windows 用户在普通 PowerShell 中执行一次 `memorydock service install`；此后 MCP 客户端连接时会在后台启动服务。也可手动运行 `memorydock serve`，然后打开 <http://127.0.0.1:40889/>。
 
 Windows、macOS、Linux 安装及各 Agent 的连接方法见[中文安装指南](docs/INSTALL.zh-CN.md)，英文版本见 [Installation](docs/INSTALL.md)。
 

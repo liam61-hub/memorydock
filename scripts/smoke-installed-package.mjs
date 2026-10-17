@@ -74,6 +74,17 @@ try {
   assert.equal(doctor.status, 0, doctor.stderr);
   assert.equal(JSON.parse(doctor.stdout).home, env.MEMORYDOCK_HOME);
 
+  const mcpBeforeService = spawnSync(process.execPath, [cli, 'mcp'], {
+    env: { ...env, MEMORYDOCK_LAUNCH_MODE: 'off' },
+    input: fixture,
+    encoding: 'utf8',
+    timeout: 30_000,
+  });
+  assert.equal(mcpBeforeService.status, 0, mcpBeforeService.stderr);
+  const earlyTools = mcpBeforeService.stdout.trim().split(/\r?\n/).map(line => JSON.parse(line))
+    .find(line => line.id === 2)?.result?.tools?.map(tool => tool.name);
+  assert.equal(earlyTools?.length, 5, 'MCP tools must be listed while the API is unavailable');
+
   service = spawn(process.execPath, [cli, 'serve'], { env, stdio: 'ignore', windowsHide: true });
   await ready(port);
   const consoleResponse = await fetch(`http://127.0.0.1:${port}/`);

@@ -22,16 +22,18 @@ git clone https://github.com/liam61-hub/memorydock.git
 cd memorydock/server
 npm ci
 npm pack
-npm install -g ./memorydock-2.0.0.tgz
+npm install -g ./memorydock-2.1.0.tgz
 memorydock init
 memorydock doctor
 ```
 
-`npm pack` builds the console and CLI, then prints the tarball name. Substitute that name in the installation command if the version changes. On Windows, `npm install -g .\memorydock-2.0.0.tgz` is equivalent.
+`npm pack` builds the console and CLI, then prints the tarball name. Substitute that name in the installation command if the version changes. On Windows, `npm install -g .\memorydock-2.1.0.tgz` is equivalent.
 
 At `memorydock init`, choose `ollama`, `openai`, or `compatible`, then enter the model and its actual embedding dimension. The command sends a test request and saves the configuration only when the response matches the requested dimension. A hosted provider sees the text sent for embedding; Ollama keeps that calculation local.
 
-Run `memorydock serve` to keep the service in a terminal and open <http://127.0.0.1:40889/>. Closing that terminal stops the foreground service. Connecting through `memorydock mcp` can start the local service on demand.
+On Windows, run `memorydock service install` once from a normal user PowerShell after installation. This registers a task with no logon or time trigger. When an MCP client connects, MemoryDock starts the service through that user-owned task if it is not already running. Multiple clients share the one service. The MCP tools become available without waiting for startup; a tool call during startup waits for readiness, up to 30 seconds. Progress is reported through MCP when the client supports it and to standard error otherwise.
+
+You can also run `memorydock serve` in a terminal and open <http://127.0.0.1:40889/>. Closing that terminal stops the foreground service. If the Windows task is missing or cannot be triggered from a restricted client, start the service from a normal user terminal. Do not run it as administrator.
 
 ## Embedding provider configuration
 
@@ -124,5 +126,7 @@ Run `memorydock --version` and `memorydock doctor`. In your client, confirm that
 The default data root is `~/.memorydock/` (`C:\Users\<user>\.memorydock` on Windows). It contains `config.json`, canonical `notes/`, derived `index/`, and backups. Set `MEMORYDOCK_HOME` to an absolute path before initialization if you want a different location. Back up `notes/` before upgrading or changing embedding models.
 
 To update, run `git pull` in the clone, then rerun `npm ci`, `npm pack`, and `npm install -g` with the new tarball name. Restart running services and MCP clients. To remove the program, run `npm uninstall -g memorydock`; this does not remove your notes. Delete `~/.memorydock/` only after exporting or backing up anything you want to keep.
+
+On Windows, run `memorydock service remove` before uninstalling. Reinstall the task after an upgrade if the Node.js or package path changed. The task starts with its own environment; custom `MEMORYDOCK_*` paths, `PORT`, `HOST`, and embedding overrides from the MCP client are not carried into it. For custom settings, run `memorydock serve` from a shell with the same overrides. `MEMORYDOCK_LAUNCH_MODE=off` disables background startup; `direct` restores child-process startup, which may inherit an agent sandbox. Windows defaults to `task`; macOS/Linux default to `direct`.
 
 If a client connects to an old build, verify the installed file under `npm root -g` and reinstall the newly packed tarball. If the local service fails to start, run `memorydock serve` in a terminal to see the startup error. Do not bind the unauthenticated local API to a public network interface.

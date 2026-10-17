@@ -6,6 +6,10 @@ describe('parseCliArgs', () => {
     expect(parseCliArgs(['serve'])).toEqual({ command: 'serve', flags: [], options: {} });
   });
 
+  it('parses the service task subcommand', () => {
+    expect(parseCliArgs(['service', 'install'])).toEqual({ command: 'service', subcommand: 'install', flags: [], options: {} });
+  });
+
   it('parses the reembed command with flags', () => {
     expect(parseCliArgs(['reembed', '--yes', '--backup'])).toEqual({
       command: 'reembed',
