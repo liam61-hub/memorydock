@@ -164,7 +164,7 @@ function App() {
     setSidebarOpen(false);
     if (next !== 'library') setSearchResults(null);
   };
-  const openCreate = () => { setSelected(null); setDraft(newDraft()); navigate('editor'); };
+  const openCreate = () => { setSelected(null); setDraft({ ...newDraft(), content_type: view === 'projects' ? 'project' : 'note' }); navigate('editor'); };
   const openDetail = (note: Note, from: View = view) => {
     setSelected(note);
     setReturnView(from === 'detail' || from === 'editor' ? 'library' : from);
