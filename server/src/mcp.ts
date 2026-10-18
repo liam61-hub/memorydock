@@ -54,14 +54,14 @@ export async function runMcp(): Promise<void> {
     if (args.tags) params.set('tags', args.tags);
     return text(await api(`/api/memories?${params}`, {}, extra));
   });
-  server.tool('propose_memory', 'Propose a durable memory after useful work. This never becomes searchable until the person approves it in MemoryDock.', {
-    title: z.string(), content: z.string(), content_type: z.string().default('note'), tags: z.string().optional(), source: z.string().optional(),
+  server.tool('propose_memory', 'Propose a durable memory after useful work. Format structured content as Markdown; the server stores it verbatim. This never becomes searchable until the person approves it in MemoryDock.', {
+    title: z.string(), content: z.string().describe('Markdown body. Use headings and lists for structured notes; wrap file paths and commands in code spans.'), content_type: z.string().default('note'), tags: z.string().optional(), source: z.string().optional(),
   }, async (args, extra) => text(await api('/api/memories/proposals', { method: 'POST', body: JSON.stringify({ ...args, tags: args.tags?.split(',').map(tag => tag.trim()), source: args.source || 'agent' }) }, extra)));
-  server.tool('push_memory', 'Save a memory directly only when the user explicitly asks to save or remember it.', {
-    title: z.string(), content: z.string(), content_type: z.string().default('note'), tags: z.string().optional(), source: z.string().optional(),
+  server.tool('push_memory', 'Save a memory directly only when the user explicitly asks to save or remember it. Format structured content as Markdown; the server stores it verbatim.', {
+    title: z.string(), content: z.string().describe('Markdown body. Use headings and lists for structured notes; wrap file paths and commands in code spans.'), content_type: z.string().default('note'), tags: z.string().optional(), source: z.string().optional(),
   }, async (args, extra) => text(await api('/api/ingest', { method: 'POST', body: JSON.stringify({ ...args, tags: args.tags?.split(',').map(tag => tag.trim()), source: args.source || 'agent' }) }, extra)));
   server.tool('update_memory', 'Update an approved memory only when the user explicitly asks to change it.', {
-    id: z.string(), title: z.string().optional(), content: z.string().optional(), append_content: z.string().optional(), version: z.number().optional(), tags: z.string().optional(), parent_id: z.string().nullable().optional(),
+    id: z.string(), title: z.string().optional(), content: z.string().describe('Replacement Markdown body; stored verbatim.').optional(), append_content: z.string().describe('Markdown to append; stored verbatim.').optional(), version: z.number().optional(), tags: z.string().optional(), parent_id: z.string().nullable().optional(),
   }, async (args, extra) => text(await api(`/api/memories/${args.id}`, { method: 'PUT', body: JSON.stringify({ ...args, tags: args.tags?.split(',').map(tag => tag.trim()) }) }, extra)));
   await server.connect(new StdioServerTransport());
   void ensureServerRunning(() => { console.error('MemoryDock: starting the local service...'); })

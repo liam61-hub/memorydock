@@ -1,6 +1,9 @@
 import React, { FormEvent, useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { renderMarkdown } from './markdown';
+import { excerptNoteContent, renderNoteContent } from './markdown';
+import type { RenderedNoteContent } from './markdown';
+import { formatDate, readLanguage, saveLanguage, translate } from './i18n';
+import type { Language, Phrase } from './i18n';
 import './style.css';
 
 type ContentType = 'project' | 'note' | 'article' | 'doc' | 'personal_info';
@@ -34,13 +37,12 @@ const viewTitles: Record<View, { eyebrow: string; title: string; description: st
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, { ...init, headers: { ...(init?.body ? { 'Content-Type': 'application/json' } : {}), ...(init?.headers || {}) } });
   const body = await response.json().catch(() => null) as { status?: boolean; data?: T; message?: string } | null;
-  if (!response.ok || !body?.status) throw new Error(body?.message || `请求失败（${response.status}）`);
+  if (!response.ok || !body?.status) throw new Error(body?.message || `Request failed (${response.status})`);
   return body.data as T;
 }
 
 const parseTags = (value: string) => [...new Set(value.split(',').map(tag => tag.trim()).filter(Boolean))].slice(0, 20);
-const formatDate = (value: string) => new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
-const excerpt = (value: string, limit = 150) => value.length > limit ? `${value.slice(0, limit).trimEnd()}…` : value;
+const excerpt = excerptNoteContent;
 const flattenTree = (items: TreeNote[]): TreeNote[] => items.flatMap(item => [item, ...flattenTree(item.children)]);
 
 async function loadWorkspace(page: number, pageSize: number, typeFilter: 'all' | ContentType, statusFilter: 'all' | Status, tagFilter: string): Promise<WorkspaceData> {
@@ -80,15 +82,25 @@ function Icon({ name }: { name: IconName }) {
   return <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">{paths[name]}</svg>;
 }
 
-function TypeBadge({ type }: { type: ContentType }) {
-  return <span className={`type-badge type-${type}`}>{CONTENT_TYPES.find(item => item.value === type)?.label || type}</span>;
+function TypeBadge({ type, language }: { type: ContentType; language: Language }) {
+  const label = CONTENT_TYPES.find(item => item.value === type)?.label as Phrase | undefined;
+  return <span className={`type-badge type-${type}`}>{label ? translate(language, label) : type}</span>;
 }
 
-function Tags({ tags }: { tags: string[] }) {
-  return tags.length ? <span className="tags">{tags.slice(0, 5).map(tag => <span className="tag" key={tag}>{tag}</span>)}</span> : <span className="muted">暂无标签</span>;
+function Tags({ tags, language }: { tags: string[]; language: Language }) {
+  return tags.length ? <span className="tags">{tags.slice(0, 5).map(tag => <span className="tag" key={tag}>{tag}</span>)}</span> : <span className="muted">{translate(language, '暂无标签')}</span>;
+}
+
+function ContentBody({ content, preview = false }: { content: RenderedNoteContent; preview?: boolean }) {
+  const className = `markdown-body${preview ? ' preview' : ''}${content.format === 'plain' ? ' plain-text' : ''}`;
+  return content.format === 'markdown'
+    ? <div className={className} dangerouslySetInnerHTML={{ __html: content.html }} />
+    : <div className={className}>{content.text}</div>;
 }
 
 function App() {
+  const [language, setLanguage] = useState<Language>(readLanguage);
+  const t = (phrase: Phrase) => translate(language, phrase);
   const [view, setView] = useState<View>('dashboard');
   const [returnView, setReturnView] = useState<View>('library');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -110,13 +122,18 @@ function App() {
   const [selected, setSelected] = useState<Note | null>(null);
   const [draft, setDraft] = useState<Draft>(newDraft());
   const [deleteTarget, setDeleteTarget] = useState<Note | null>(null);
+  useEffect(() => {
+    document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+    saveLanguage(language);
+  }, [language]);
   const pageSize = 20;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const allApproved = useMemo(() => flattenTree(tree), [tree]);
   const projects = useMemo(() => allApproved.filter(note => note.content_type === 'project' && note.status === 'active'), [allApproved]);
   const recent = useMemo(() => [...allApproved].sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at)).slice(0, 6), [allApproved]);
-  const renderedContent = useMemo(() => renderMarkdown(selected?.content || ''), [selected?.content]);
-  const previewContent = useMemo(() => renderMarkdown(draft.content), [draft.content]);
+  const renderedContent = useMemo(() => renderNoteContent(selected?.content || ''), [selected?.content]);
+  const previewContent = useMemo(() => renderNoteContent(draft.content), [draft.content]);
+  useEffect(() => { document.title = `${selected && view === 'detail' ? selected.title : translate(language, viewTitles[view].title as Phrase)} | MemoryDock`; }, [language, selected, view]);
 
   const applyWorkspace = (workspace: WorkspaceData) => {
     setNotes(workspace.library.items);
@@ -172,7 +189,7 @@ function App() {
   };
   const saveNote = async (event: FormEvent) => {
     event.preventDefault();
-    if (!draft.title.trim() || !draft.content.trim()) { setError('标题和内容不能为空。'); return; }
+    if (!draft.title.trim() || !draft.content.trim()) { setError(t('标题和内容不能为空。')); return; }
     setBusy('save');
     try {
       const payload = { ...draft, title: draft.title.trim(), content: draft.content.trim(), source: draft.source.trim(), tags: draft.tags };
@@ -181,7 +198,7 @@ function App() {
         ? await request<Note>(`/api/memories/${selected.id}`, { method: 'PUT', body: JSON.stringify({ ...payload, version: selected.version }) })
         : await request<Note>('/api/memories', { method: 'POST', body: JSON.stringify(payload) });
       setSelected(saved);
-      setNotice(wasEditing ? '条目已更新。' : '条目已创建并建立索引。');
+      setNotice(wasEditing ? t('条目已更新。') : t('条目已创建并建立索引。'));
       setError('');
       resetSearch();
       if (!wasEditing) setReturnView('library');
@@ -192,7 +209,7 @@ function App() {
   };
   const approve = async (note: Note) => {
     setBusy(note.id);
-    try { await request<Note>(`/api/memories/${note.id}/approve`, { method: 'POST' }); setNotice(`已批准“${note.title}”。`); await refresh(); }
+    try { await request<Note>(`/api/memories/${note.id}/approve`, { method: 'POST' }); setNotice(language === 'zh' ? `已批准“${note.title}”。` : `Approved “${note.title}”.`); await refresh(); }
     catch (reason) { setError((reason as Error).message); }
     finally { setBusy(''); }
   };
@@ -201,7 +218,7 @@ function App() {
     try {
       const updated = await request<Note>(`/api/memories/${note.id}`, { method: 'PUT', body: JSON.stringify({ status: note.status === 'active' ? 'archived' : 'active' }) });
       if (selected?.id === updated.id) setSelected(updated);
-      setNotice(note.status === 'active' ? '条目已归档。' : '条目已恢复。');
+      setNotice(note.status === 'active' ? t('条目已归档。') : t('条目已恢复。'));
       await refresh();
     } catch (reason) { setError((reason as Error).message); }
     finally { setBusy(''); }
@@ -211,7 +228,7 @@ function App() {
     setBusy('delete');
     try {
       await request<unknown>(`/api/memories/${deleteTarget.id}`, { method: 'DELETE' });
-      setNotice(`已删除“${deleteTarget.title}”。`);
+      setNotice(language === 'zh' ? `已删除“${deleteTarget.title}”。` : `Deleted “${deleteTarget.title}”.`);
       const wasSelected = selected?.id === deleteTarget.id;
       setDeleteTarget(null);
       if (wasSelected) { setSelected(null); setView('library'); }
@@ -221,65 +238,67 @@ function App() {
   };
   const copyMarkdown = async () => {
     if (!selected) return;
-    try { await navigator.clipboard.writeText(selected.content); setNotice('Markdown 已复制到剪贴板。'); }
-    catch { setError('复制失败，请检查浏览器的剪贴板权限。'); }
+    try { await navigator.clipboard.writeText(selected.content); setNotice(t('Markdown 已复制到剪贴板。')); }
+    catch { setError(t('复制失败，请检查浏览器的剪贴板权限。')); }
   };
 
   const visibleNotes = searchResults?.items.map(item => item.entry) || notes;
   const activeMenu = view === 'detail' ? returnView : view;
   const navigation = [
-    { label: '工作台', items: [{ id: 'dashboard' as View, label: '首页概览', icon: 'dashboard' as IconName }] },
-    { label: '记忆库', items: [
-      { id: 'library' as View, label: '搜索浏览', icon: 'search' as IconName, count: allApproved.length },
-      { id: 'editor' as View, label: '新建条目', icon: 'plus' as IconName, action: openCreate },
-      { id: 'projects' as View, label: '项目列表', icon: 'folder' as IconName, count: projects.length },
-      { id: 'inbox' as View, label: '审核收件箱', icon: 'inbox' as IconName, count: pending.length },
-      { id: 'tree' as View, label: '记忆地图', icon: 'tree' as IconName },
+    { label: t('工作台'), items: [{ id: 'dashboard' as View, label: t('首页概览'), icon: 'dashboard' as IconName }] },
+    { label: t('记忆库'), items: [
+      { id: 'library' as View, label: t('搜索浏览'), icon: 'search' as IconName, count: allApproved.length },
+      { id: 'editor' as View, label: t('新建条目'), icon: 'plus' as IconName, action: openCreate },
+      { id: 'projects' as View, label: t('项目列表'), icon: 'folder' as IconName, count: projects.length },
+      { id: 'inbox' as View, label: t('审核收件箱'), icon: 'inbox' as IconName, count: pending.length },
+      { id: 'tree' as View, label: t('记忆地图'), icon: 'tree' as IconName },
     ] },
   ];
 
-  const renderTable = (items: Note[], emptyText = '暂无记忆条目') => items.length ? (
-    <div className="memory-table">
-      <div className="table-head"><span>标题</span><span>类型</span><span>标签</span><span>更新时间</span><span>操作</span></div>
-      {items.map(note => <div className="table-row" key={note.id}>
-        <button className="title-cell" onClick={() => openDetail(note)}><strong>{note.title}</strong><span>{excerpt(note.content)}</span></button>
-        <div><TypeBadge type={note.content_type} /></div>
-        <div><Tags tags={note.tags} /></div>
-        <time>{formatDate(note.updated_at)}</time>
-        <div className="row-actions"><button className="icon-button" title="编辑" aria-label={`编辑 ${note.title}`} onClick={() => openEdit(note)}><Icon name="edit" /></button><button className="icon-button" title={note.status === 'active' ? '归档' : '恢复'} aria-label={`${note.status === 'active' ? '归档' : '恢复'} ${note.title}`} onClick={() => void archive(note)} disabled={busy === note.id}><Icon name="archive" /></button><button className="icon-button danger" title="删除" aria-label={`删除 ${note.title}`} onClick={() => setDeleteTarget(note)}><Icon name="trash" /></button></div>
-      </div>)}
+  const renderCards = (items: Note[], emptyText = t('暂无记忆条目')) => items.length ? (
+    <div className="memory-grid">
+      {items.map(note => <article className="memory-card" key={note.id}>
+        <div className="memory-card-top"><div><TypeBadge language={language} type={note.content_type} />{note.status === 'archived' && <span className="status-label archived">{t('已归档')}</span>}</div><time>{formatDate(note.updated_at, language)}</time></div>
+        <button className="memory-card-main" onClick={() => openDetail(note)}>
+          <strong>{note.title}</strong><span>{excerpt(note.content, 210)}</span>
+        </button>
+        <div className="memory-card-footer">
+          <Tags language={language} tags={note.tags} />
+          <div className="memory-card-actions"><button className="icon-button" title={t('编辑')} aria-label={`${t('编辑')} ${note.title}`} onClick={() => openEdit(note)}><Icon name="edit" /></button><button className="icon-button" title={note.status === 'active' ? t('归档') : t('恢复')} aria-label={`${note.status === 'active' ? t('归档') : t('恢复')} ${note.title}`} onClick={() => void archive(note)} disabled={busy === note.id}><Icon name="archive" /></button><button className="icon-button danger" title={t('删除')} aria-label={`${t('删除')} ${note.title}`} onClick={() => setDeleteTarget(note)}><Icon name="trash" /></button></div>
+        </div>
+      </article>)}
     </div>
-  ) : <div className="empty-state"><div className="empty-icon"><Icon name="document" /></div><h3>{emptyText}</h3><p>新建条目，或调整搜索与筛选条件后再试。</p><button className="button primary" onClick={openCreate}><Icon name="plus" />新建条目</button></div>;
+  ) : <div className="empty-state"><div className="empty-icon"><Icon name="document" /></div><h3>{emptyText}</h3><p>{t('新建条目，或调整搜索与筛选条件后再试。')}</p><button className="button primary" onClick={openCreate}><Icon name="plus" />{t('新建条目')}</button></div>;
 
-  const renderTree = (items: TreeNote[]): React.ReactNode => <ul className="tree-list">{items.map(note => <li key={note.id}><div className="tree-node"><span className="tree-line" /><button onClick={() => openDetail(note, 'tree')}><Icon name="document" />{note.title}</button><TypeBadge type={note.content_type} /></div>{note.children.length > 0 && renderTree(note.children)}</li>)}</ul>;
+  const renderTree = (items: TreeNote[]): React.ReactNode => <ul className="tree-list">{items.map(note => <li key={note.id}><div className="tree-node"><span className="tree-line" /><button onClick={() => openDetail(note, 'tree')}><Icon name="document" />{note.title}</button><TypeBadge language={language} type={note.content_type} /></div>{note.children.length > 0 && renderTree(note.children)}</li>)}</ul>;
 
   return <div className="app-shell">
-    <button className="mobile-menu" aria-label="打开菜单" onClick={() => setSidebarOpen(true)}><Icon name="menu" /></button>
-    {sidebarOpen && <button className="sidebar-scrim" aria-label="关闭菜单" onClick={() => setSidebarOpen(false)} />}
+    <button className="mobile-menu" aria-label={t('打开菜单')} onClick={() => setSidebarOpen(true)}><Icon name="menu" /></button>
+    {sidebarOpen && <button className="sidebar-scrim" aria-label={t('关闭菜单')} onClick={() => setSidebarOpen(false)} />}
     <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-      <div className="brand"><div className="brand-mark">M</div><div><strong>MemoryDock</strong><span>本地记忆管理台</span></div></div>
-      <nav aria-label="管理菜单">{navigation.map(group => <div className="nav-group" key={group.label}><p>{group.label}</p>{group.items.map(item => <button key={item.label} className={`nav-item ${activeMenu === item.id ? 'active' : ''}`} onClick={() => item.action ? item.action() : navigate(item.id)}><Icon name={item.icon} /><span>{item.label}</span>{item.count !== undefined && <b>{item.count}</b>}</button>)}</div>)}</nav>
-      <div className="sidebar-footer"><span className="local-indicator" /><div><strong>本地私有存储</strong><span>数据保存在你的设备上</span></div></div>
+      <div className="brand"><div className="brand-mark">M</div><div><strong>MemoryDock</strong><span>{t('本地记忆管理台')}</span></div></div>
+      <nav aria-label={t('管理菜单')}>{navigation.map(group => <div className="nav-group" key={group.label}><p>{group.label}</p>{group.items.map(item => <button key={item.label} className={`nav-item ${activeMenu === item.id ? 'active' : ''}`} onClick={() => item.action ? item.action() : navigate(item.id)}><Icon name={item.icon} /><span>{item.label}</span>{item.count !== undefined && <b>{item.count}</b>}</button>)}</div>)}</nav>
+      <div className="sidebar-footer"><span className="local-indicator" /><div><strong>{t('本地私有存储')}</strong><span>{t('数据保存在你的设备上')}</span></div></div>
     </aside>
     <main className="workspace">
-      <header className="topbar"><div><p className="eyebrow">{viewTitles[view].eyebrow}</p><h1>{view === 'editor' ? (selected ? '编辑记忆条目' : '新建记忆条目') : view === 'detail' && selected ? selected.title : viewTitles[view].title}</h1><p className="page-description">{viewTitles[view].description}</p></div><div className="topbar-actions"><button className="button secondary" onClick={() => void refresh()} disabled={loading}><Icon name="refresh" />刷新</button>{view !== 'editor' && <button className="button primary" onClick={openCreate}><Icon name="plus" />新建条目</button>}</div></header>
-      {(error || notice) && <div className={`message ${error ? 'error' : 'success'}`} role="status"><span>{error || notice}</span><button aria-label="关闭提示" onClick={() => { setError(''); setNotice(''); }}><Icon name="close" /></button></div>}
+      <header className="topbar"><div><p className="eyebrow">{viewTitles[view].eyebrow}</p><h1>{view === 'editor' ? (selected ? t('编辑记忆条目') : t('新建记忆条目')) : view === 'detail' && selected ? selected.title : t(viewTitles[view].title as Phrase)}</h1><p className="page-description">{t(viewTitles[view].description as Phrase)}</p></div><div className="topbar-actions"><label className="language-picker"><span>{t('语言')}</span><select aria-label={t('语言')} value={language} onChange={event => setLanguage(event.target.value as Language)}><option value="en">English</option><option value="zh">中文</option></select></label><button className="button secondary" onClick={() => void refresh()} disabled={loading}><Icon name="refresh" />{t('刷新')}</button>{view !== 'editor' && <button className="button primary" onClick={openCreate}><Icon name="plus" />{t('新建条目')}</button>}</div></header>
+      {(error || notice) && <div className={`message ${error ? 'error' : 'success'}`} role="status"><span>{error || notice}</span><button aria-label={t('关闭提示')} onClick={() => { setError(''); setNotice(''); }}><Icon name="close" /></button></div>}
 
-      {view === 'dashboard' && <section className="view-section"><div className="stat-grid"><article className="stat-card"><span className="stat-icon green"><Icon name="library" /></span><div><small>记忆总量</small><strong>{allApproved.length}</strong><p>已批准并可搜索</p></div></article><article className="stat-card"><span className="stat-icon blue"><Icon name="folder" /></span><div><small>项目索引</small><strong>{projects.length}</strong><p>活跃项目条目</p></div></article><article className="stat-card"><span className="stat-icon amber"><Icon name="inbox" /></span><div><small>待审核</small><strong>{pending.length}</strong><p>尚未进入搜索</p></div></article><article className="stat-card"><span className="stat-icon violet"><Icon name="tree" /></span><div><small>记忆关系</small><strong>{allApproved.filter(note => note.parent_id).length}</strong><p>已建立父子关联</p></div></article></div><div className="dashboard-grid"><article className="panel recent-panel"><div className="panel-heading"><div><h2>最近更新</h2><p>快速回到刚刚维护的内容</p></div><button className="text-button" onClick={() => navigate('library')}>查看全部 <Icon name="chevron" /></button></div>{recent.length ? <div className="recent-list">{recent.map(note => <button key={note.id} onClick={() => openDetail(note, 'dashboard')}><span className="document-icon"><Icon name="document" /></span><span><strong>{note.title}</strong><small>{formatDate(note.updated_at)}</small></span><TypeBadge type={note.content_type} /><Icon name="chevron" /></button>)}</div> : <div className="compact-empty">还没有记忆条目</div>}</article><article className="panel quick-panel"><div className="panel-heading"><div><h2>快捷入口</h2><p>常用的记忆管理操作</p></div></div><button onClick={openCreate}><span className="quick-icon"><Icon name="plus" /></span><span><strong>新建记忆条目</strong><small>使用 Markdown 记录内容</small></span></button><button onClick={() => navigate('inbox')}><span className="quick-icon"><Icon name="check" /></span><span><strong>处理审核收件箱</strong><small>{pending.length ? `${pending.length} 条等待确认` : '目前没有待审核项'}</small></span></button><button onClick={() => navigate('projects')}><span className="quick-icon"><Icon name="folder" /></span><span><strong>浏览项目索引</strong><small>查看项目与技术栈记录</small></span></button></article></div></section>}
+      {view === 'dashboard' && <section className="view-section"><div className="stat-grid"><article className="stat-card"><span className="stat-icon green"><Icon name="library" /></span><div><small>{t('记忆总量')}</small><strong>{allApproved.length}</strong><p>{t('已批准并可搜索')}</p></div></article><article className="stat-card"><span className="stat-icon blue"><Icon name="folder" /></span><div><small>{t('项目索引')}</small><strong>{projects.length}</strong><p>{t('活跃项目条目')}</p></div></article><article className="stat-card"><span className="stat-icon amber"><Icon name="inbox" /></span><div><small>{t('待审核')}</small><strong>{pending.length}</strong><p>{t('尚未进入搜索')}</p></div></article><article className="stat-card"><span className="stat-icon violet"><Icon name="tree" /></span><div><small>{t('记忆关系')}</small><strong>{allApproved.filter(note => note.parent_id).length}</strong><p>{t('已建立父子关联')}</p></div></article></div><div className="dashboard-grid"><article className="panel recent-panel"><div className="panel-heading"><div><h2>{t('最近更新')}</h2><p>{t('快速回到刚刚维护的内容')}</p></div><button className="text-button" onClick={() => navigate('library')}>{t('查看全部')} <Icon name="chevron" /></button></div>{recent.length ? <div className="recent-list">{recent.map(note => <button key={note.id} onClick={() => openDetail(note, 'dashboard')}><span className="document-icon"><Icon name="document" /></span><span><strong>{note.title}</strong><small>{formatDate(note.updated_at, language)}</small></span><TypeBadge language={language} type={note.content_type} /><Icon name="chevron" /></button>)}</div> : <div className="compact-empty">{t('还没有记忆条目')}</div>}</article><article className="panel quick-panel"><div className="panel-heading"><div><h2>{t('快捷入口')}</h2><p>{t('常用的记忆管理操作')}</p></div></div><button onClick={openCreate}><span className="quick-icon"><Icon name="plus" /></span><span><strong>{t('新建记忆条目')}</strong><small>{t('使用 Markdown 记录内容')}</small></span></button><button onClick={() => navigate('inbox')}><span className="quick-icon"><Icon name="check" /></span><span><strong>{t('处理审核收件箱')}</strong><small>{pending.length ? language === 'zh' ? `${pending.length} 条等待确认` : `${pending.length} awaiting review` : t('目前没有待审核项')}</small></span></button><button onClick={() => navigate('projects')}><span className="quick-icon"><Icon name="folder" /></span><span><strong>{t('浏览项目索引')}</strong><small>{t('查看项目与技术栈记录')}</small></span></button></article></div></section>}
 
-      {view === 'library' && <section className="view-section"><div className="search-panel"><form className="search-form" onSubmit={submitSearch}><Icon name="search" /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="语义搜索记忆库……" aria-label="搜索记忆库" /><button className="button primary" type="submit" disabled={busy === 'search'}>{busy === 'search' ? '搜索中…' : '搜索'}</button>{searchResults && <button className="clear-button" type="button" onClick={resetSearch}>清除</button>}</form><div className="filters"><label>内容类型<select value={typeFilter} onChange={event => { setLoading(true); setPage(1); setTypeFilter(event.target.value as 'all' | ContentType); }}><option value="all">全部类型</option>{CONTENT_TYPES.map(type => <option key={type.value} value={type.value}>{type.label}</option>)}</select></label><label>状态<select value={statusFilter} onChange={event => { setLoading(true); setPage(1); setStatusFilter(event.target.value as 'all' | Status); }}><option value="all">全部状态</option><option value="active">使用中</option><option value="archived">已归档</option></select></label><label className="tag-filter">标签<input value={tagFilter} onChange={event => setTagFilter(event.target.value)} onBlur={() => { setLoading(true); setPage(1); setAppliedTagFilter(tagFilter); }} placeholder="例如：Java, 架构" /></label></div></div><div className="section-heading"><div><h2>{searchResults ? `“${query}”的搜索结果` : '记忆条目'}</h2><p>{searchResults ? `${searchResults.items.length} 条相关结果${searchResults.degraded ? ' · 当前使用关键词降级搜索' : ''}` : `共 ${total} 条 · 第 ${page}/${totalPages} 页`}</p></div>{loading && <span className="loading-label">正在更新…</span>}</div>{renderTable(visibleNotes, searchResults ? '没有找到匹配内容' : '暂无记忆条目')}{!searchResults && totalPages > 1 && <nav className="pagination" aria-label="记忆列表分页"><button className="button secondary" disabled={page === 1} onClick={() => { setLoading(true); setPage(current => current - 1); }}>上一页</button><span>第 {page} / {totalPages} 页</span><button className="button secondary" disabled={page >= totalPages} onClick={() => { setLoading(true); setPage(current => current + 1); }}>下一页</button></nav>}</section>}
+      {view === 'library' && <section className="view-section"><div className="search-panel"><form className="search-form" onSubmit={submitSearch}><Icon name="search" /><input value={query} onChange={event => setQuery(event.target.value)} placeholder={t('语义搜索记忆库……')} aria-label={t('搜索记忆库')} /><button className="button primary" type="submit" disabled={busy === 'search'}>{busy === 'search' ? t('搜索中…') : t('搜索')}</button>{searchResults && <button className="clear-button" type="button" onClick={resetSearch}>{t('清除')}</button>}</form><div className="filters"><label>{t('内容类型')}<select value={typeFilter} onChange={event => { setLoading(true); setPage(1); setTypeFilter(event.target.value as 'all' | ContentType); }}><option value="all">{t('全部类型')}</option>{CONTENT_TYPES.map(type => <option key={type.value} value={type.value}>{t(type.label as Phrase)}</option>)}</select></label><label>{t('状态')}<select value={statusFilter} onChange={event => { setLoading(true); setPage(1); setStatusFilter(event.target.value as 'all' | Status); }}><option value="all">{t('全部状态')}</option><option value="active">{t('使用中')}</option><option value="archived">{t('已归档')}</option></select></label><label className="tag-filter">{t('标签')}<input value={tagFilter} onChange={event => setTagFilter(event.target.value)} onBlur={() => { setLoading(true); setPage(1); setAppliedTagFilter(tagFilter); }} placeholder={t('例如：Java, 架构')} /></label></div></div><div className="section-heading"><div><h2>{searchResults ? language === 'zh' ? `“${query}”的搜索结果` : `Results for “${query}”` : t('记忆条目')}</h2><p>{searchResults ? language === 'zh' ? `${searchResults.items.length} 条相关结果${searchResults.degraded ? ' · 当前使用关键词降级搜索' : ''}` : `${searchResults.items.length} results${searchResults.degraded ? ' · Keyword fallback active' : ''}` : language === 'zh' ? `共 ${total} 条 · 第 ${page}/${totalPages} 页` : `${total} memories · Page ${page} of ${totalPages}`}</p></div>{loading && <span className="loading-label">{t('正在更新…')}</span>}</div>{renderCards(visibleNotes, searchResults ? t('没有找到匹配内容') : t('暂无记忆条目'))}{!searchResults && totalPages > 1 && <nav className="pagination" aria-label={t('记忆列表分页')}><button className="button secondary" disabled={page === 1} onClick={() => { setLoading(true); setPage(current => current - 1); }}>{t('上一页')}</button><span>{language === 'zh' ? `第 ${page} / ${totalPages} 页` : `Page ${page} of ${totalPages}`}</span><button className="button secondary" disabled={page >= totalPages} onClick={() => { setLoading(true); setPage(current => current + 1); }}>{t('下一页')}</button></nav>}</section>}
 
-      {view === 'projects' && <section className="view-section"><div className="section-heading"><div><h2>已索引项目</h2><p>共 {projects.length} 个活跃项目</p></div></div>{projects.length ? <div className="project-grid">{projects.map(project => <article className="project-card" key={project.id}><div className="project-card-top"><span className="project-icon"><Icon name="folder" /></span><button className="icon-button" aria-label={`编辑 ${project.title}`} onClick={() => openEdit(project)}><Icon name="edit" /></button></div><button className="project-title" onClick={() => openDetail(project, 'projects')}>{project.title}</button><p>{excerpt(project.content, 210)}</p><Tags tags={project.tags} /><footer><span>{project.source || '未标注来源'}</span><time>{formatDate(project.updated_at)}</time></footer></article>)}</div> : <div className="empty-state"><div className="empty-icon"><Icon name="folder" /></div><h3>暂无项目索引</h3><p>创建类型为“项目”的记忆条目后，会集中显示在这里。</p><button className="button primary" onClick={openCreate}><Icon name="plus" />新建项目条目</button></div>}</section>}
+      {view === 'projects' && <section className="view-section"><div className="section-heading"><div><h2>{t('已索引项目')}</h2><p>{language === 'zh' ? `共 ${projects.length} 个活跃项目` : `${projects.length} active projects`}</p></div></div>{projects.length ? <div className="project-grid">{projects.map(project => <article className="project-card" key={project.id}><div className="project-card-top"><span className="project-icon"><Icon name="folder" /></span><button className="icon-button" aria-label={`${t('编辑')} ${project.title}`} onClick={() => openEdit(project)}><Icon name="edit" /></button></div><button className="project-title" onClick={() => openDetail(project, 'projects')}>{project.title}</button><p>{excerpt(project.content, 210)}</p><Tags language={language} tags={project.tags} /><footer><span>{project.source || t('未标注来源')}</span><time>{formatDate(project.updated_at, language)}</time></footer></article>)}</div> : <div className="empty-state"><div className="empty-icon"><Icon name="folder" /></div><h3>{t('暂无项目索引')}</h3><p>{t('创建类型为“项目”的记忆条目后，会集中显示在这里。')}</p><button className="button primary" onClick={openCreate}><Icon name="plus" />{t('新建项目条目')}</button></div>}</section>}
 
-      {view === 'inbox' && <section className="view-section"><div className="section-heading"><div><h2>需要人工确认</h2><p>代理提议在批准前保持私有，也不会出现在搜索结果中。</p></div></div>{pending.length ? <div className="inbox-list">{pending.map(note => <article className="proposal" key={note.id}><div className="proposal-content"><div className="proposal-heading"><TypeBadge type={note.content_type} /><span>来源：{note.source || 'agent'}</span></div><h3>{note.title}</h3><p>{note.content}</p><Tags tags={note.tags} /></div><div className="proposal-actions"><button className="button primary" disabled={busy === note.id} onClick={() => void approve(note)}><Icon name="check" />{busy === note.id ? '批准中…' : '批准入库'}</button><button className="button secondary" onClick={() => openEdit(note)}>审核并编辑</button><button className="text-danger" onClick={() => setDeleteTarget(note)}>删除</button></div></article>)}</div> : <div className="empty-state"><div className="empty-icon"><Icon name="inbox" /></div><h3>收件箱已清空</h3><p>代理提交的新候选记忆会在这里等待你的确认。</p></div>}</section>}
+      {view === 'inbox' && <section className="view-section"><div className="section-heading"><div><h2>{t('需要人工确认')}</h2><p>{t('代理提议在批准前保持私有，也不会出现在搜索结果中。')}</p></div></div>{pending.length ? <div className="inbox-list">{pending.map(note => <article className="proposal" key={note.id}><div className="proposal-content"><div className="proposal-heading"><TypeBadge language={language} type={note.content_type} /><span>{t('来源：')}{note.source || 'agent'}</span></div><h3>{note.title}</h3><p>{note.content}</p><Tags language={language} tags={note.tags} /></div><div className="proposal-actions"><button className="button primary" disabled={busy === note.id} onClick={() => void approve(note)}><Icon name="check" />{busy === note.id ? t('批准中…') : t('批准入库')}</button><button className="button secondary" onClick={() => openEdit(note)}>{t('审核并编辑')}</button><button className="text-danger" onClick={() => setDeleteTarget(note)}>{t('删除')}</button></div></article>)}</div> : <div className="empty-state"><div className="empty-icon"><Icon name="inbox" /></div><h3>{t('收件箱已清空')}</h3><p>{t('代理提交的新候选记忆会在这里等待你的确认。')}</p></div>}</section>}
 
-      {view === 'tree' && <section className="view-section"><div className="section-heading"><div><h2>记忆关系</h2><p>编辑条目并指定上级条目，即可调整记忆结构。</p></div></div><div className="map-card">{tree.length ? renderTree(tree) : <div className="empty-state compact"><div className="empty-icon"><Icon name="tree" /></div><h3>还没有记忆关系</h3><p>创建条目后，在编辑页为它选择上级条目。</p></div>}</div></section>}
+      {view === 'tree' && <section className="view-section"><div className="section-heading"><div><h2>{t('记忆关系')}</h2><p>{t('编辑条目并指定上级条目，即可调整记忆结构。')}</p></div></div><div className="map-card">{tree.length ? renderTree(tree) : <div className="empty-state compact"><div className="empty-icon"><Icon name="tree" /></div><h3>{t('还没有记忆关系')}</h3><p>{t('创建条目后，在编辑页为它选择上级条目。')}</p></div>}</div></section>}
 
-      {view === 'detail' && selected && <section className="view-section detail-view"><div className="detail-toolbar"><button className="button secondary" onClick={() => navigate(returnView)}><Icon name="back" />返回</button><div><button className="button secondary" onClick={() => void copyMarkdown()}><Icon name="copy" />复制 Markdown</button><button className="button secondary" onClick={() => openEdit(selected)}><Icon name="edit" />编辑</button><button className="button danger-outline" onClick={() => setDeleteTarget(selected)}><Icon name="trash" />删除</button></div></div><article className="reader-card"><header className="reader-header"><div className="reader-meta"><TypeBadge type={selected.content_type} /><span className={`status-label ${selected.status}`}>{selected.status === 'active' ? '使用中' : '已归档'}</span><Tags tags={selected.tags} /></div><h2>{selected.title}</h2><div className="reader-byline"><span>来源：{selected.source || '未标注'}</span><span>创建于 {formatDate(selected.created_at)}</span><span>更新于 {formatDate(selected.updated_at)}</span><span>版本 {selected.version}</span></div></header><div className="markdown-body" dangerouslySetInnerHTML={{ __html: renderedContent }} /></article></section>}
+      {view === 'detail' && selected && <section className="view-section detail-view"><div className="detail-toolbar"><button className="button secondary" onClick={() => navigate(returnView)}><Icon name="back" />{t('返回')}</button><div><button className="button secondary" onClick={() => void copyMarkdown()}><Icon name="copy" />{t('复制 Markdown')}</button><button className="button secondary" onClick={() => openEdit(selected)}><Icon name="edit" />{t('编辑')}</button><button className="button danger-outline" onClick={() => setDeleteTarget(selected)}><Icon name="trash" />{t('删除')}</button></div></div><article className="reader-card"><header className="reader-header"><div className="reader-meta"><TypeBadge language={language} type={selected.content_type} /><span className={`status-label ${selected.status}`}>{selected.status === 'active' ? t('使用中') : t('已归档')}</span><Tags language={language} tags={selected.tags} /></div><h2>{selected.title}</h2><div className="reader-byline"><span>{t('来源：')}{selected.source || t('未标注')}</span><span>{t('创建于')} {formatDate(selected.created_at, language)}</span><span>{t('更新于')} {formatDate(selected.updated_at, language)}</span><span>{t('版本')} {selected.version}</span></div></header><ContentBody content={renderedContent} /></article></section>}
 
-      {view === 'editor' && <section className="view-section"><form className="editor-card" onSubmit={saveNote}><div className="editor-fields"><div className="form-grid"><label className="field full">标题<input value={draft.title} onChange={event => setDraft(current => ({ ...current, title: event.target.value }))} maxLength={500} autoFocus required placeholder="输入清晰、可检索的标题" /></label><label className="field">类型<select value={draft.content_type} onChange={event => setDraft(current => ({ ...current, content_type: event.target.value as ContentType }))}>{CONTENT_TYPES.map(type => <option key={type.value} value={type.value}>{type.label}</option>)}</select></label><label className="field">状态<select value={draft.status} onChange={event => setDraft(current => ({ ...current, status: event.target.value as Status }))}><option value="active">使用中</option><option value="archived">已归档</option></select></label><label className="field">标签<input value={draft.tags.join(', ')} onChange={event => setDraft(current => ({ ...current, tags: parseTags(event.target.value) }))} placeholder="逗号分隔，例如：Java, 架构" /></label><label className="field">来源<input value={draft.source} onChange={event => setDraft(current => ({ ...current, source: event.target.value }))} placeholder="内容来源（可选）" /></label>{selected && <label className="field full">上级条目<select value={draft.parent_id || ''} onChange={event => setDraft(current => ({ ...current, parent_id: event.target.value || null }))}><option value="">无上级（顶层条目）</option>{allApproved.filter(item => item.id !== selected.id).map(item => <option value={item.id} key={item.id}>{item.title}</option>)}</select></label>}<label className="field full content-field">Markdown 内容<textarea value={draft.content} onChange={event => setDraft(current => ({ ...current, content: event.target.value }))} maxLength={50000} required spellCheck={false} placeholder={'# 标题\n\n在这里输入 Markdown 内容……'} /></label></div></div><aside className="preview-pane"><div className="preview-heading"><strong>实时预览</strong><span>Markdown</span></div>{draft.content.trim() ? <div className="markdown-body preview" dangerouslySetInnerHTML={{ __html: previewContent }} /> : <div className="preview-empty"><Icon name="document" /><p>输入内容后将在这里实时预览</p></div>}</aside><footer className="editor-actions"><button className="button secondary" type="button" onClick={() => selected ? navigate('detail') : navigate('library')}>取消</button><button className="button primary" type="submit" disabled={busy === 'save'}>{busy === 'save' ? '保存中…' : selected ? '保存修改' : '创建并索引'}</button></footer></form></section>}
+      {view === 'editor' && <section className="view-section"><form className="editor-card" onSubmit={saveNote}><div className="editor-fields"><div className="form-grid"><label className="field full">{t('标题')}<input value={draft.title} onChange={event => setDraft(current => ({ ...current, title: event.target.value }))} maxLength={500} autoFocus required placeholder={t('输入清晰、可检索的标题')} /></label><label className="field">{t('类型')}<select value={draft.content_type} onChange={event => setDraft(current => ({ ...current, content_type: event.target.value as ContentType }))}>{CONTENT_TYPES.map(type => <option key={type.value} value={type.value}>{t(type.label as Phrase)}</option>)}</select></label><label className="field">{t('状态')}<select value={draft.status} onChange={event => setDraft(current => ({ ...current, status: event.target.value as Status }))}><option value="active">{t('使用中')}</option><option value="archived">{t('已归档')}</option></select></label><label className="field">{t('标签')}<input value={draft.tags.join(', ')} onChange={event => setDraft(current => ({ ...current, tags: parseTags(event.target.value) }))} placeholder={t('逗号分隔，例如：Java, 架构')} /></label><label className="field">{t('来源')}<input value={draft.source} onChange={event => setDraft(current => ({ ...current, source: event.target.value }))} placeholder={t('内容来源（可选）')} /></label>{selected && <label className="field full">{t('上级条目')}<select value={draft.parent_id || ''} onChange={event => setDraft(current => ({ ...current, parent_id: event.target.value || null }))}><option value="">{t('无上级（顶层条目）')}</option>{allApproved.filter(item => item.id !== selected.id).map(item => <option value={item.id} key={item.id}>{item.title}</option>)}</select></label>}<label className="field full content-field">{t('Markdown 内容')}<textarea value={draft.content} onChange={event => setDraft(current => ({ ...current, content: event.target.value }))} maxLength={50000} required spellCheck={false} placeholder={t('# 标题\n\n在这里输入 Markdown 内容……')} /></label></div></div><aside className="preview-pane"><div className="preview-heading"><strong>{t('实时预览')}</strong><span>{previewContent.format === 'markdown' ? 'Markdown' : t('纯文本')}</span></div>{draft.content.trim() ? <ContentBody content={previewContent} preview /> : <div className="preview-empty"><Icon name="document" /><p>{t('输入内容后将在这里实时预览')}</p></div>}</aside><footer className="editor-actions"><button className="button secondary" type="button" onClick={() => selected ? navigate('detail') : navigate('library')}>{t('取消')}</button><button className="button primary" type="submit" disabled={busy === 'save'}>{busy === 'save' ? t('保存中…') : selected ? t('保存修改') : t('创建并索引')}</button></footer></form></section>}
     </main>
-    {deleteTarget && <div className="modal-backdrop" role="presentation" onMouseDown={() => setDeleteTarget(null)}><section className="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="delete-title" onMouseDown={event => event.stopPropagation()}><div className="modal-icon warning"><Icon name="trash" /></div><h2 id="delete-title">删除这个条目？</h2><p>“{deleteTarget.title}”将从本地 Markdown 文件与搜索索引中移除，此操作无法在管理台中撤销。</p><div className="modal-actions"><button className="button secondary" onClick={() => setDeleteTarget(null)}>取消</button><button className="button danger-button" onClick={() => void remove()} disabled={busy === 'delete'}>{busy === 'delete' ? '删除中…' : '确认删除'}</button></div></section></div>}
+    {deleteTarget && <div className="modal-backdrop" role="presentation" onMouseDown={() => setDeleteTarget(null)}><section className="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="delete-title" onMouseDown={event => event.stopPropagation()}><div className="modal-icon warning"><Icon name="trash" /></div><h2 id="delete-title">{t('删除这个条目？')}</h2><p>{language === 'zh' ? `“${deleteTarget.title}”将从本地 Markdown 文件与搜索索引中移除，此操作无法在管理台中撤销。` : `“${deleteTarget.title}” will be removed from local Markdown files and the search index. You cannot undo this in the console.`}</p><div className="modal-actions"><button className="button secondary" onClick={() => setDeleteTarget(null)}>{t('取消')}</button><button className="button danger-button" onClick={() => void remove()} disabled={busy === 'delete'}>{busy === 'delete' ? t('删除中…') : t('确认删除')}</button></div></section></div>}
   </div>;
 }
 

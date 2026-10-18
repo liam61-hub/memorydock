@@ -22,12 +22,12 @@ git clone https://github.com/liam61-hub/memorydock.git
 cd memorydock/server
 npm ci
 npm pack
-npm install -g ./memorydock-2.1.0.tgz
+npm install -g ./memorydock-2.1.1.tgz
 memorydock init
 memorydock doctor
 ```
 
-`npm pack` 会构建管理界面和命令行，并输出实际生成的包文件名。版本变化时，在安装命令中改用该文件名。Windows 也可写成 `npm install -g .\memorydock-2.1.0.tgz`。
+`npm pack` 会构建管理界面和命令行，并输出实际生成的包文件名。版本变化时，在安装命令中改用该文件名。Windows 也可写成 `npm install -g .\memorydock-2.1.1.tgz`。
 
 执行 `memorydock init` 时选择 `ollama`、`openai` 或 `compatible`，再填写模型和真实的向量维度。命令会发出测试请求，只有返回维度匹配才保存配置。使用云端服务时，待向量化的文本会发送给该服务；使用 Ollama 可在本机完成计算。
 

@@ -12,7 +12,7 @@ git clone https://github.com/liam61-hub/memorydock.git
 cd memorydock/server
 npm ci
 npm pack
-npm install -g ./memorydock-2.1.0.tgz
+npm install -g ./memorydock-2.1.1.tgz
 memorydock init
 memorydock service install  # Windows, run once in a normal user PowerShell
 ```
@@ -83,6 +83,9 @@ All data lives under one per-user root: `~/.memorydock`
 | `~/.memorydock/index/` | Derived LanceDB search index (rebuildable) |
 | `~/.memorydock/backups/` | Scheduled `memory-<timestamp>.tar.gz` index backups |
 | `~/.memorydock/migrations/` | One-time migration records |
+
+Note bodies are stored verbatim. The MCP tools ask agents to write structured
+content in Markdown, while the console preserves older plain-text notes.
 
 Optional overrides: `MEMORYDOCK_HOME` (data root), `MEMORYDOCK_CONFIG_PATH`,
 `MEMORYDOCK_NOTES_PATH`, `MEMORYDOCK_INDEX_PATH`. All paths are absolute and

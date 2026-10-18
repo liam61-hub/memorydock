@@ -22,12 +22,12 @@ git clone https://github.com/liam61-hub/memorydock.git
 cd memorydock/server
 npm ci
 npm pack
-npm install -g ./memorydock-2.1.0.tgz
+npm install -g ./memorydock-2.1.1.tgz
 memorydock init
 memorydock doctor
 ```
 
-`npm pack` builds the console and CLI, then prints the tarball name. Substitute that name in the installation command if the version changes. On Windows, `npm install -g .\memorydock-2.1.0.tgz` is equivalent.
+`npm pack` builds the console and CLI, then prints the tarball name. Substitute that name in the installation command if the version changes. On Windows, `npm install -g .\memorydock-2.1.1.tgz` is equivalent.
 
 At `memorydock init`, choose `ollama`, `openai`, or `compatible`, then enter the model and its actual embedding dimension. The command sends a test request and saves the configuration only when the response matches the requested dimension. A hosted provider sees the text sent for embedding; Ollama keeps that calculation local.
 

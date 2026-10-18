@@ -89,7 +89,7 @@ try {
   await ready(port);
   const consoleResponse = await fetch(`http://127.0.0.1:${port}/`);
   assert.equal(consoleResponse.status, 200);
-  assert.match(await consoleResponse.text(), /<html/i);
+  assert.match(await consoleResponse.text(), /<html lang="en">/i);
 
   const mcp = spawnSync(process.execPath, [cli, 'mcp'], {
     env,
@@ -99,8 +99,12 @@ try {
   });
   assert.equal(mcp.status, 0, mcp.stderr);
   const lines = mcp.stdout.trim().split(/\r?\n/).map(line => JSON.parse(line));
-  const names = lines.find(line => line.id === 2)?.result?.tools?.map(tool => tool.name);
+  const catalog = lines.find(line => line.id === 2)?.result?.tools;
+  const names = catalog?.map(tool => tool.name);
   assert.deepEqual(names?.slice().sort(), ['list_memories', 'propose_memory', 'push_memory', 'search_memory', 'update_memory']);
+  const push = catalog.find(tool => tool.name === 'push_memory');
+  assert.match(push.description, /Markdown/);
+  assert.match(push.inputSchema.properties.content.description, /Markdown/);
   console.log(`Installed MemoryDock ${pack[0].version}: CLI, console, and MCP tool catalog passed`);
 } finally {
   if (service && !service.killed) {
