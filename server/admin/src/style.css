@@ -162,6 +162,14 @@ h2 { margin-bottom: 5px; color: #303133; font-size: 19px; letter-spacing: -.025e
 .markdown-body table { display: block; overflow-x: auto; width: max-content; max-width: 100%; border-spacing: 0; border-collapse: collapse; }
 .markdown-body th, .markdown-body td { padding: 8px 12px; border: 1px solid #dfe3e8; text-align: left; }.markdown-body th { background: #f5f7fa; font-weight: 600; }.markdown-body tr:nth-child(even) { background: #fafbfc; }
 .markdown-body img { max-width: 100%; border-radius: 5px; }.markdown-body hr { height: 1px; margin: 2em 0; border: 0; background: #e4e7ed; }
+/* The existing `pre code` rule already neutralises github-dark's `.hljs` base colors and padding. */
+/* GFM table column alignment: marked emits `align` on th/td, re-established here. */
+.markdown-body th[align="left"], .markdown-body td[align="left"] { text-align: left; }.markdown-body th[align="center"], .markdown-body td[align="center"] { text-align: center; }.markdown-body th[align="right"], .markdown-body td[align="right"] { text-align: right; }
+/* GFM task lists: hide the list marker and polish the checkbox. */
+.markdown-body li:has(> input[type="checkbox"]) { list-style: none; margin-left: -1.25em; }
+.markdown-body input[type="checkbox"] { accent-color: #409eff; }
+/* Rendered mermaid diagrams. */
+.markdown-body .mermaid-diagram { overflow-x: auto; margin: 0 0 1.2em; text-align: center; }.markdown-body .mermaid-diagram svg { max-width: 100%; height: auto; }
 
 .editor-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, .88fr); overflow: hidden; border: 1px solid #e4e7ed; border-radius: 6px; background: #fff; }
 .editor-fields { padding: 22px; border-right: 1px solid #e4e7ed; }.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }.field.full { grid-column: 1 / -1; }
