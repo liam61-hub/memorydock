@@ -4,6 +4,8 @@
 
 MemoryDock 是面向 AI Agent 的本地记忆工具。Codex、Claude Code、Cursor 等 MCP 客户端可以共享同一本存放在你电脑上的笔记。Agent 提议保存的记忆需要先由你在管理界面审核。Markdown 文件是原始数据，LanceDB 本地索引用于检索。
 
+MemoryDock 原样保存提交的正文。纯文本也是合法的 Markdown，但只有 Agent 或编辑器写入标题、列表等语法时，页面才会显示相应结构。管理界面同时支持结构化 Markdown 和旧的纯文本笔记。内容列表采用摘要卡片，界面默认英文，可切换为中文并记住选择。
+
 MemoryDock 只服务于单台电脑，HTTP 服务仅监听回环地址，无需任何账号。向量计算可使用本地 Ollama，也可使用你自行配置的 OpenAI 兼容服务；使用云端向量服务时，待向量化的文本会发送给该服务。
 
 ## 从 GitHub 安装
@@ -15,12 +17,12 @@ git clone https://github.com/liam61-hub/memorydock.git
 cd memorydock/server
 npm ci
 npm pack
-npm install -g ./memorydock-2.0.0.tgz
+npm install -g ./memorydock-2.1.1.tgz
 memorydock init
 memorydock doctor
 ```
 
-`npm pack` 会输出实际生成的文件名；版本不同时，请在安装命令中使用该文件名。`memorydock init` 会先验证向量服务，再保存配置。运行 `memorydock serve` 后可打开 <http://127.0.0.1:40889/>。MCP 客户端启动 `memorydock mcp` 时也会按需启动本地服务。
+`npm pack` 会输出实际生成的文件名；版本不同时，请在安装命令中使用该文件名。`memorydock init` 会先验证向量服务，再保存配置。Windows 用户在普通 PowerShell 中执行一次 `memorydock service install`；此后 MCP 客户端连接时会在后台启动服务。也可手动运行 `memorydock serve`，然后打开 <http://127.0.0.1:40889/>。
 
 Windows、macOS、Linux 安装及各 Agent 的连接方法见[中文安装指南](docs/INSTALL.zh-CN.md)，英文版本见 [Installation](docs/INSTALL.md)。
 

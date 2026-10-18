@@ -74,11 +74,22 @@ try {
   assert.equal(doctor.status, 0, doctor.stderr);
   assert.equal(JSON.parse(doctor.stdout).home, env.MEMORYDOCK_HOME);
 
+  const mcpBeforeService = spawnSync(process.execPath, [cli, 'mcp'], {
+    env: { ...env, MEMORYDOCK_LAUNCH_MODE: 'off' },
+    input: fixture,
+    encoding: 'utf8',
+    timeout: 30_000,
+  });
+  assert.equal(mcpBeforeService.status, 0, mcpBeforeService.stderr);
+  const earlyTools = mcpBeforeService.stdout.trim().split(/\r?\n/).map(line => JSON.parse(line))
+    .find(line => line.id === 2)?.result?.tools?.map(tool => tool.name);
+  assert.equal(earlyTools?.length, 5, 'MCP tools must be listed while the API is unavailable');
+
   service = spawn(process.execPath, [cli, 'serve'], { env, stdio: 'ignore', windowsHide: true });
   await ready(port);
   const consoleResponse = await fetch(`http://127.0.0.1:${port}/`);
   assert.equal(consoleResponse.status, 200);
-  assert.match(await consoleResponse.text(), /<html/i);
+  assert.match(await consoleResponse.text(), /<html lang="en">/i);
 
   const mcp = spawnSync(process.execPath, [cli, 'mcp'], {
     env,
@@ -88,8 +99,12 @@ try {
   });
   assert.equal(mcp.status, 0, mcp.stderr);
   const lines = mcp.stdout.trim().split(/\r?\n/).map(line => JSON.parse(line));
-  const names = lines.find(line => line.id === 2)?.result?.tools?.map(tool => tool.name);
+  const catalog = lines.find(line => line.id === 2)?.result?.tools;
+  const names = catalog?.map(tool => tool.name);
   assert.deepEqual(names?.slice().sort(), ['list_memories', 'propose_memory', 'push_memory', 'search_memory', 'update_memory']);
+  const push = catalog.find(tool => tool.name === 'push_memory');
+  assert.match(push.description, /Markdown/);
+  assert.match(push.inputSchema.properties.content.description, /Markdown/);
   console.log(`Installed MemoryDock ${pack[0].version}: CLI, console, and MCP tool catalog passed`);
 } finally {
   if (service && !service.killed) {

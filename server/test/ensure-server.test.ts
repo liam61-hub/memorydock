@@ -1,38 +1,63 @@
 import { EventEmitter } from 'node:events';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { spawn } = vi.hoisted(() => ({ spawn: vi.fn() }));
+const { spawn, startServiceTask } = vi.hoisted(() => ({ spawn: vi.fn(), startServiceTask: vi.fn() }));
 vi.mock('node:child_process', () => ({ spawn }));
+vi.mock('../src/service-task.js', () => ({ startServiceTask }));
 
 beforeEach(() => {
   vi.resetModules();
   spawn.mockReset();
+  startServiceTask.mockReset();
   delete process.env.MEMORYDOCK_API_URL;
+  delete process.env.MEMORYDOCK_LAUNCH_MODE;
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
   delete process.env.MEMORYDOCK_API_URL;
+  delete process.env.MEMORYDOCK_LAUNCH_MODE;
 });
 
 describe('ensureServerRunning', () => {
-  it('uses an already running local API', async () => {
+  it('uses an already running API without starting another process', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: 'alive' }) }));
     const { ensureServerRunning } = await import('../src/ensure-server.js');
     await ensureServerRunning();
+    expect(startServiceTask).not.toHaveBeenCalled();
     expect(spawn).not.toHaveBeenCalled();
   });
 
-  it('starts the API for a local MCP client and waits for liveness', async () => {
-    vi.stubGlobal('fetch', vi.fn()
+  it('shares a Windows task launch between concurrent callers and waits for readiness', async () => {
+    process.env.MEMORYDOCK_LAUNCH_MODE = 'task';
+    let release!: () => void;
+    const launched = new Promise<void>(resolve => { release = resolve; });
+    startServiceTask.mockReturnValue(launched);
+    const fetch = vi.fn()
       .mockRejectedValueOnce(new Error('connection refused'))
-      .mockResolvedValue({ ok: true, json: async () => ({ status: 'alive' }) }));
-    const child = Object.assign(new EventEmitter(), { unref: vi.fn() });
-    spawn.mockReturnValue(child);
+      .mockResolvedValue({ ok: true, json: async () => ({ status: 'alive' }) });
+    vi.stubGlobal('fetch', fetch);
     const { ensureServerRunning } = await import('../src/ensure-server.js');
-    await ensureServerRunning();
-    expect(spawn).toHaveBeenCalledWith(process.execPath, expect.arrayContaining(['serve']), expect.objectContaining({ detached: true, stdio: 'ignore', windowsHide: true }));
-    expect(child.unref).toHaveBeenCalled();
+    const progressA = vi.fn();
+    const progressB = vi.fn();
+    const first = ensureServerRunning(progressA);
+    const second = ensureServerRunning(progressB);
+    await vi.waitFor(() => expect(startServiceTask).toHaveBeenCalledOnce());
+    expect(progressA).toHaveBeenCalledOnce();
+    expect(progressB).toHaveBeenCalledOnce();
+    expect(spawn).not.toHaveBeenCalled();
+    release();
+    await Promise.all([first, second]);
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives setup instructions if the Windows task cannot start', async () => {
+    process.env.MEMORYDOCK_LAUNCH_MODE = 'task';
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('connection refused')));
+    startServiceTask.mockRejectedValue(new Error('task missing'));
+    const { ensureServerRunning } = await import('../src/ensure-server.js');
+    await expect(ensureServerRunning()).rejects.toThrow('memorydock service install');
+    expect(spawn).not.toHaveBeenCalled();
   });
 
   it('does not launch a local process for an unavailable remote API', async () => {
@@ -40,10 +65,11 @@ describe('ensureServerRunning', () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('unavailable')));
     const { ensureServerRunning } = await import('../src/ensure-server.js');
     await expect(ensureServerRunning()).rejects.toThrow('Start the target server');
-    expect(spawn).not.toHaveBeenCalled();
+    expect(startServiceTask).not.toHaveBeenCalled();
   });
 
-  it('reports a failed local process launch', async () => {
+  it('reports direct launch errors when direct mode is explicitly selected', async () => {
+    process.env.MEMORYDOCK_LAUNCH_MODE = 'direct';
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('connection refused')));
     const child = Object.assign(new EventEmitter(), { unref: vi.fn() });
     spawn.mockImplementation(() => {

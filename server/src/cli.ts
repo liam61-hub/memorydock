@@ -17,7 +17,7 @@ import { migrateStorage } from './storage/migrate-storage.js';
 import { getTable } from './db/lancedb.js';
 import { fromRow } from './db/schema.js';
 import { runMcp } from './mcp.js';
-import { ensureServerRunning } from './ensure-server.js';
+import { installServiceTask, removeServiceTask } from './service-task.js';
 
 function isMainModule(): boolean {
   const entry = process.argv[1];
@@ -29,10 +29,11 @@ function isMainModule(): boolean {
   }
 }
 export interface ParsedArgs {
-  command: 'serve' | 'mcp' | 'init' | 'doctor' | 'export' | 'rebuild-notes' | 'migrate-storage' | 'reembed' | 'version' | 'help';
+  command: 'serve' | 'mcp' | 'service' | 'init' | 'doctor' | 'export' | 'rebuild-notes' | 'migrate-storage' | 'reembed' | 'version' | 'help';
   flags: string[];
   /** `--name value` pairs (e.g. { from: '<path>' }). */
   options: Record<string, string>;
+  subcommand?: string;
 }
 export function parseCliArgs(argv: string[]): ParsedArgs {
   const [cmd, ...rest] = argv; const flags = rest.filter(a => a.startsWith('-'));
@@ -46,6 +47,7 @@ export function parseCliArgs(argv: string[]): ParsedArgs {
     i += 1;
   }
   if (cmd === '--version' || cmd === '-v') return { command: 'version', flags, options };
+  if (cmd === 'service') return { command: 'service', flags, options, subcommand: rest[0] };
   if (['serve', 'mcp', 'init', 'doctor', 'export', 'rebuild-notes', 'migrate-storage', 'reembed'].includes(cmd || '')) return { command: cmd as ParsedArgs['command'], flags, options };
   return { command: 'help', flags, options };
 }
@@ -55,6 +57,8 @@ Usage:
   memorydock init            Configure and test an embedding provider
   memorydock serve           Start the local API and memory console
   memorydock mcp             Start the local stdio MCP adapter
+  memorydock service install Register a Windows user task for on-demand startup
+  memorydock service remove  Remove the Windows user task
   memorydock doctor          Print configuration and storage health
   memorydock export <path>   Copy Markdown notes to a portable directory
   memorydock rebuild-notes --yes
@@ -160,7 +164,11 @@ async function main(): Promise<void> {
   const parsed = parseCliArgs(process.argv.slice(2));
   switch (parsed.command) {
     case 'serve': await startServer(); return;
-    case 'mcp': await ensureServerRunning(); await runMcp(); return;
+    case 'mcp': await runMcp(); return;
+    case 'service':
+      if (parsed.subcommand === 'install') { await installServiceTask(); console.log('MemoryDock on-demand service task installed.'); return; }
+      if (parsed.subcommand === 'remove') { await removeServiceTask(); console.log('MemoryDock on-demand service task removed.'); return; }
+      throw new Error('Usage: memorydock service install|remove');
     case 'init': await runInit(); return;
     case 'doctor': await runDoctor(); return;
     case 'export': await runExport(); return;

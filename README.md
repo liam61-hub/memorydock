@@ -4,6 +4,8 @@
 
 MemoryDock is local-first memory for AI agents. Codex, Claude Code, Cursor, and other MCP clients can search and save notes in one notebook on your computer. You review agent-proposed memories before they become searchable. Markdown files are the source of truth; a local LanceDB index supports search.
 
+MemoryDock saves note bodies exactly as submitted. Plain text is valid Markdown, but headings and lists appear only when the agent or editor includes Markdown syntax. The console displays both structured Markdown and older plain-text notes. Its memory list uses preview cards, and the console opens in English by default with a persistent English/Chinese language switch.
+
 MemoryDock runs on one computer, listens on loopback, and needs no account. Embeddings can run locally with Ollama or through an OpenAI-compatible provider you configure. Hosted embedding providers receive the text sent for embedding.
 
 ## Install from GitHub
@@ -15,12 +17,12 @@ git clone https://github.com/liam61-hub/memorydock.git
 cd memorydock/server
 npm ci
 npm pack
-npm install -g ./memorydock-2.0.0.tgz
+npm install -g ./memorydock-2.1.1.tgz
 memorydock init
 memorydock doctor
 ```
 
-`npm pack` prints the generated filename. Use that filename if the package version differs from this example. `memorydock init` tests the embedding provider before saving its configuration. The service and console can be started with `memorydock serve`; open <http://127.0.0.1:40889/>. An MCP client running `memorydock mcp` starts the local service on demand.
+`npm pack` prints the generated filename. Use that filename if the package version differs from this example. `memorydock init` tests the embedding provider before saving its configuration. On Windows, run `memorydock service install` once from a normal user PowerShell. Connecting an MCP client then starts the local service in the background. The service and console can also be started with `memorydock serve`; open <http://127.0.0.1:40889/>.
 
 See the [installation guide](docs/INSTALL.md) for Windows, macOS, Linux, client configuration, upgrades, and uninstalling. The [Chinese guide](docs/INSTALL.zh-CN.md) has the same steps.
 
