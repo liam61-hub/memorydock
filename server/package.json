@@ -1,6 +1,6 @@
 {
   "name": "memorydock",
-  "version": "2.1.1",
+  "version": "2.1.3",
   "description": "Local-first memory for AI agents with a web console and MCP adapter",
   "author": "MemoryDock contributors",
   "license": "Apache-2.0",
@@ -25,9 +25,10 @@
     "build": "tsc",
     "build:admin": "vite build --config admin/vite.config.ts",
     "lint": "eslint . --max-warnings=0",
-    "prepack": "npm run build:admin && npm run build",
+    "prepack": "npm run check:local-version && npm run build:admin && npm run build",
     "typecheck": "tsc --project tsconfig.check.json && tsc --project admin/tsconfig.json",
     "test": "vitest run",
+    "check:local-version": "node ../scripts/check-local-version.mjs",
     "smoke:package": "node ../scripts/smoke-installed-package.mjs"
   },
   "engines": {

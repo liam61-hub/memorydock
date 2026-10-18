@@ -12,7 +12,7 @@ git clone https://github.com/liam61-hub/memorydock.git
 cd memorydock/server
 npm ci
 npm pack
-npm install -g ./memorydock-2.1.1.tgz
+npm install -g ./memorydock-2.1.3.tgz
 memorydock init
 memorydock service install  # Windows, run once in a normal user PowerShell
 ```

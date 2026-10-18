@@ -22,12 +22,14 @@ git clone https://github.com/liam61-hub/memorydock.git
 cd memorydock/server
 npm ci
 npm pack
-npm install -g ./memorydock-2.1.1.tgz
+npm install -g ./memorydock-2.1.3.tgz
 memorydock init
 memorydock doctor
 ```
 
-`npm pack` 会构建管理界面和命令行，并输出实际生成的包文件名。版本变化时，在安装命令中改用该文件名。Windows 也可写成 `npm install -g .\memorydock-2.1.1.tgz`。
+`npm pack` 会先检查源码版本不低于本机全局安装版本，再构建管理界面和命令行，并输出实际生成的包文件名。版本变化时，在安装命令中改用该文件名。Windows 也可写成 `npm install -g .\memorydock-2.1.3.tgz`。
+
+本仓库的 Windows 本地安装脚本是根目录的 `scripts/configure-mcp.ps1`。先不加参数运行可查看将执行的操作；在普通用户 PowerShell 中加 `-Apply`，会从根目录 `server/` 检查版本、打包并全局安装，更新隐藏服务任务，以及备份并配置 Codex 和 Claude Code 的 MCP 设置。安装后可用 `-Verify` 检查。
 
 执行 `memorydock init` 时选择 `ollama`、`openai` 或 `compatible`，再填写模型和真实的向量维度。命令会发出测试请求，只有返回维度匹配才保存配置。使用云端服务时，待向量化的文本会发送给该服务；使用 Ollama 可在本机完成计算。
 
@@ -127,6 +129,6 @@ Windows 上将 `command` 改为 `node.exe` 的绝对路径，并将 `args` 设�
 
 升级时，在克隆目录中运行 `git pull`，然后重新执行 `npm ci`、`npm pack` 和 `npm install -g`，安装新的包文件，最后重启服务及 MCP 客户端。卸载程序可运行 `npm uninstall -g memorydock`；这不会删除笔记。确认已经导出或备份后，才删除 `~/.memorydock/`。
 
-Windows 上卸载前先运行 `memorydock service remove`。如果升级后 Node.js 或包路径改变，应重新安装计划任务。该任务使用独立环境，不继承 MCP 客户端中的自定义 `MEMORYDOCK_*` 路径、`PORT`、`HOST` 及向量配置环境变量；使用自定义设置时，请在带相同变量的终端运行 `memorydock serve`。`MEMORYDOCK_LAUNCH_MODE=off` 可关闭后台启动；`direct` 使用旧的子进程启动方式，可能继承 Agent 沙箱。Windows 默认为 `task`，macOS/Linux 默认为 `direct`。
+Windows 上卸载前先运行 `memorydock service remove`。每次升级后都应重新运行 `memorydock service install`，更新隐藏运行的计划任务。服务日志写入 `~/.memorydock/logs/serve.log`；重启现有服务后，MCP 客户端会按需通过新任务启动它。该任务使用独立环境，不继承 MCP 客户端中的自定义 `MEMORYDOCK_*` 路径、`PORT`、`HOST` 及向量配置环境变量；使用自定义设置时，请在带相同变量的终端运行 `memorydock serve`。`MEMORYDOCK_LAUNCH_MODE=off` 可关闭后台启动；`direct` 使用旧的子进程启动方式，可能继承 Agent 沙箱。Windows 默认为 `task`，macOS/Linux 默认为 `direct`。
 
 如果客户端仍连接旧版本，检查 `npm root -g` 下的安装文件，并重新安装刚打包的文件。如果服务启动失败，在终端运行 `memorydock serve` 查看错误。不要把无认证的本地 API 绑定到公网地址。

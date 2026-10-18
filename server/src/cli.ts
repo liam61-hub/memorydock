@@ -5,19 +5,7 @@ import * as path from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { fileURLToPath } from 'node:url';
-import { startServer } from './index.js';
-import { createBackup } from './modules/backup/index.js';
-import { buildLanceReembedContext, reembedAll } from './modules/reembed/index.js';
-import { configuredEmbedding, saveLocalSettings, type EmbeddingProvider } from './local-config.js';
-import { userDataDir } from './local-config.js';
-import { config } from './config.js';
-import { notesRoot } from './storage/markdown-notes.js';
-import { writeMarkdownNote } from './storage/markdown-notes.js';
-import { migrateStorage } from './storage/migrate-storage.js';
-import { getTable } from './db/lancedb.js';
-import { fromRow } from './db/schema.js';
-import { runMcp } from './mcp.js';
-import { installServiceTask, removeServiceTask } from './service-task.js';
+import type { EmbeddingProvider } from './local-config.js';
 
 function isMainModule(): boolean {
   const entry = process.argv[1];
@@ -91,6 +79,10 @@ async function promptSecret(prompt: string): Promise<string> {
 }
 async function runReembed(flags: string[]): Promise<void> {
   if (!flags.includes('--yes')) throw new Error('This rebuilds vectors in place; rerun with --yes.');
+  const [{ createBackup }, { buildLanceReembedContext, reembedAll }] = await Promise.all([
+    import('./modules/backup/index.js'),
+    import('./modules/reembed/index.js'),
+  ]);
   if (flags.includes('--backup')) await createBackup();
   const result = await reembedAll(await buildLanceReembedContext(console.log));
   console.log(`Re-embed complete: ${result.entries} entries, ${result.chunks} chunks.`);
@@ -119,11 +111,18 @@ async function runInit(): Promise<void> {
     const actualDim = result.data?.[0]?.embedding?.length;
     if (!actualDim) throw new Error('Provider test returned no embedding');
     if (actualDim !== dim) throw new Error(`Provider returned dimension ${actualDim}; run init again with that dimension`);
+    const { saveLocalSettings } = await import('./local-config.js');
     console.log(`Configuration saved to ${saveLocalSettings({ embedding: { provider, baseUrl, apiKey, model, dim } })}`);
     console.log('Restart any running "memorydock serve" process to apply this configuration.');
   } finally { if (!readlineClosed) rl.close(); }
 }
 async function runDoctor(): Promise<void> {
+  const [{ configuredEmbedding, userDataDir }, { notesRoot }, { config }, { getTable }] = await Promise.all([
+    import('./local-config.js'),
+    import('./storage/markdown-notes.js'),
+    import('./config.js'),
+    import('./db/lancedb.js'),
+  ]);
   const embedding = configuredEmbedding();
   const root = notesRoot();
   const notesExist = await fs.stat(root).then(() => true).catch(() => false);
@@ -144,11 +143,17 @@ async function runDoctor(): Promise<void> {
 async function runExport(): Promise<void> {
   const destination = process.argv.slice(3).find(arg => !arg.startsWith('-'));
   if (!destination) throw new Error('Usage: memorydock export <directory>');
+  const { notesRoot } = await import('./storage/markdown-notes.js');
   await fs.cp(notesRoot(), path.resolve(destination), { recursive: true, force: true });
   console.log(`Exported Markdown notes to ${path.resolve(destination)}`);
 }
 async function runRebuildNotes(flags: string[]): Promise<void> {
   if (!flags.includes('--yes')) throw new Error('This creates Markdown mirrors of existing entries; rerun with --yes.');
+  const [{ getTable }, { writeMarkdownNote, notesRoot }, { fromRow }] = await Promise.all([
+    import('./db/lancedb.js'),
+    import('./storage/markdown-notes.js'),
+    import('./db/schema.js'),
+  ]);
   const rows = await (await getTable()).query().limit(10000).toArray();
   for (const row of rows) await writeMarkdownNote(fromRow(row));
   console.log(`Migrated ${rows.length} entries to ${notesRoot()}`);
@@ -157,18 +162,21 @@ async function runMigrateStorage(parsed: ParsedArgs): Promise<void> {
   if (!parsed.flags.includes('--yes')) throw new Error('Storage migration requires explicit confirmation; rerun with --yes.');
   const source = parsed.options.from;
   if (!source) throw new Error('Usage: memorydock migrate-storage --from <path> --yes (stop "memorydock serve" first)');
+  const { migrateStorage } = await import('./storage/migrate-storage.js');
   const result = await migrateStorage(source);
   console.log(JSON.stringify(result, null, 2));
 }
 async function main(): Promise<void> {
   const parsed = parseCliArgs(process.argv.slice(2));
   switch (parsed.command) {
-    case 'serve': await startServer(); return;
-    case 'mcp': await runMcp(); return;
-    case 'service':
+    case 'serve': await (await import('./index.js')).startServer(); return;
+    case 'mcp': await (await import('./mcp.js')).runMcp(); return;
+    case 'service': {
+      const { installServiceTask, removeServiceTask } = await import('./service-task.js');
       if (parsed.subcommand === 'install') { await installServiceTask(); console.log('MemoryDock on-demand service task installed.'); return; }
       if (parsed.subcommand === 'remove') { await removeServiceTask(); console.log('MemoryDock on-demand service task removed.'); return; }
       throw new Error('Usage: memorydock service install|remove');
+    }
     case 'init': await runInit(); return;
     case 'doctor': await runDoctor(); return;
     case 'export': await runExport(); return;

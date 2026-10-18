@@ -22,12 +22,14 @@ git clone https://github.com/liam61-hub/memorydock.git
 cd memorydock/server
 npm ci
 npm pack
-npm install -g ./memorydock-2.1.1.tgz
+npm install -g ./memorydock-2.1.3.tgz
 memorydock init
 memorydock doctor
 ```
 
-`npm pack` builds the console and CLI, then prints the tarball name. Substitute that name in the installation command if the version changes. On Windows, `npm install -g .\memorydock-2.1.1.tgz` is equivalent.
+`npm pack` checks that source is not older than the global installation, then builds the console and CLI. Substitute the printed filename if the version changes. On Windows, `npm install -g .\memorydock-2.1.3.tgz` is equivalent.
+
+On Windows, the repository's `scripts/configure-mcp.ps1` installer uses the root `server/` source. Run it without arguments to preview its actions, with `-Apply` from a normal user PowerShell to package and install, refresh the hidden service task, and back up and configure Codex and Claude Code MCP entries. Use `-Verify` to inspect the installed setup.
 
 At `memorydock init`, choose `ollama`, `openai`, or `compatible`, then enter the model and its actual embedding dimension. The command sends a test request and saves the configuration only when the response matches the requested dimension. A hosted provider sees the text sent for embedding; Ollama keeps that calculation local.
 
@@ -127,6 +129,6 @@ The default data root is `~/.memorydock/` (`C:\Users\<user>\.memorydock` on Wind
 
 To update, run `git pull` in the clone, then rerun `npm ci`, `npm pack`, and `npm install -g` with the new tarball name. Restart running services and MCP clients. To remove the program, run `npm uninstall -g memorydock`; this does not remove your notes. Delete `~/.memorydock/` only after exporting or backing up anything you want to keep.
 
-On Windows, run `memorydock service remove` before uninstalling. Reinstall the task after an upgrade if the Node.js or package path changed. The task starts with its own environment; custom `MEMORYDOCK_*` paths, `PORT`, `HOST`, and embedding overrides from the MCP client are not carried into it. For custom settings, run `memorydock serve` from a shell with the same overrides. `MEMORYDOCK_LAUNCH_MODE=off` disables background startup; `direct` restores child-process startup, which may inherit an agent sandbox. Windows defaults to `task`; macOS/Linux default to `direct`.
+On Windows, run `memorydock service remove` before uninstalling. After every upgrade, run `memorydock service install` again to refresh the hidden task action. It writes service output to `~/.memorydock/logs/serve.log`. Restart the running service to use the new package; the task starts it again when an MCP client connects. The task starts with its own environment; custom `MEMORYDOCK_*` paths, `PORT`, `HOST`, and embedding overrides from the MCP client are not carried into it. For custom settings, run `memorydock serve` from a shell with the same overrides. `MEMORYDOCK_LAUNCH_MODE=off` disables background startup; `direct` restores child-process startup, which may inherit an agent sandbox. Windows defaults to `task`; macOS/Linux default to `direct`.
 
 If a client connects to an old build, verify the installed file under `npm root -g` and reinstall the newly packed tarball. If the local service fails to start, run `memorydock serve` in a terminal to see the startup error. Do not bind the unauthenticated local API to a public network interface.

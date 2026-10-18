@@ -31,8 +31,15 @@ describe('Windows on-demand service task', () => {
     expect(script).toContain('-LogonType Interactive -RunLevel Limited');
     expect(script).toContain('-MultipleInstances IgnoreNew');
     expect(script).not.toContain('New-ScheduledTaskTrigger');
-    expect(options.env.MEMORYDOCK_NODE_EXECUTABLE).toBe(process.execPath);
-    expect(options.env.MEMORYDOCK_CLI_PATH).toMatch(/cli\.js$/);
+    expect(script).toContain("-Execute 'powershell.exe'");
+    expect(script).toContain('-WindowStyle Hidden');
+    const encodedService = /-WindowStyle Hidden -EncodedCommand ([A-Za-z0-9+/=]+)/.exec(script)?.[1];
+    expect(encodedService).toBeDefined();
+    const service = Buffer.from(encodedService!, 'base64').toString('utf16le');
+    expect(service).toContain('serve *>> $logPath');
+    expect(service).toContain("'serve.log'");
+    expect(service).toContain(process.execPath.replaceAll("'", "''"));
+    expect(options.windowsHide).toBe(true);
   });
 
   it('requests the registered task without directly spawning the API', async () => {

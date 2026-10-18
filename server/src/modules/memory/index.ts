@@ -435,6 +435,8 @@ export async function registerMemoryRoutes(app: FastifyInstance) {
       rows = rows.filter(r => filterTags.some(t => r.tags.includes(t)));
     }
 
+    rows.sort((a, b) => b.created_at.localeCompare(a.created_at) || a.id.localeCompare(b.id));
+
     // Pagination
     const total = rows.length;
     const offset = (page - 1) * pageSize;

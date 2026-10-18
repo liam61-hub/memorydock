@@ -118,7 +118,6 @@ export async function registerSearchRoutes(app: FastifyInstance) {
               items.push(ki);
             }
           }
-          items = items.slice(0, top_k);
           degraded = items.length > 0 && items[0].score < 0.3; // mark the degraded state
         }
       } catch {
@@ -130,6 +129,12 @@ export async function registerSearchRoutes(app: FastifyInstance) {
       // Embedding API unavailable: degrade directly
       degraded = true;
       items = await keywordFallback(query, content_type, tags, status, created_after, created_before, sort_by, tid, top_k);
+    }
+
+    if (sort_by === 'created_at' || sort_by === 'updated_at') {
+      items = applySorting(items, sort_by).slice(0, top_k);
+    } else {
+      items = items.slice(0, top_k);
     }
 
     // Build the suggestion message
@@ -175,7 +180,7 @@ function applySorting(
 ): SearchResultItem[] {
   switch (sortBy) {
     case 'created_at':
-      return items.sort((a, b) => b.entry.created_at.localeCompare(a.entry.created_at));
+      return items.sort((a, b) => b.entry.created_at.localeCompare(a.entry.created_at) || a.entry.id.localeCompare(b.entry.id));
     case 'updated_at':
       return items.sort((a, b) => b.entry.updated_at.localeCompare(a.entry.updated_at));
     case 'relevance':

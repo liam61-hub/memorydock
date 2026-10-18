@@ -183,7 +183,7 @@ function App() {
     if (!value) { resetSearch(); return; }
     setBusy('search');
     try {
-      setSearchResults(await request('/api/search', { method: 'POST', body: JSON.stringify({ query: value, content_type: typeFilter === 'all' ? undefined : typeFilter, status: statusFilter === 'all' ? undefined : statusFilter, tags: parseTags(tagFilter), top_k: 24 }) }));
+      setSearchResults(await request('/api/search', { method: 'POST', body: JSON.stringify({ query: value, content_type: typeFilter === 'all' ? undefined : typeFilter, status: statusFilter === 'all' ? undefined : statusFilter, tags: parseTags(tagFilter), top_k: 24, sort_by: 'created_at' }) }));
       setError('');
     } catch (reason) { setError((reason as Error).message); }
     finally { setBusy(''); }
@@ -259,7 +259,7 @@ function App() {
   const renderCards = (items: Note[], emptyText = t('暂无记忆条目')) => items.length ? (
     <div className="memory-grid">
       {items.map(note => <article className="memory-card" key={note.id}>
-        <div className="memory-card-top"><div><TypeBadge language={language} type={note.content_type} />{note.status === 'archived' && <span className="status-label archived">{t('已归档')}</span>}</div><time>{formatDate(note.updated_at, language)}</time></div>
+        <div className="memory-card-top"><div><TypeBadge language={language} type={note.content_type} />{note.status === 'archived' && <span className="status-label archived">{t('已归档')}</span>}</div><time dateTime={note.created_at} title={t('创建于')}>{formatDate(note.created_at, language)}</time></div>
         <button className="memory-card-main" onClick={() => openDetail(note)}>
           <strong>{note.title}</strong><span>{excerpt(note.content, 210)}</span>
         </button>
