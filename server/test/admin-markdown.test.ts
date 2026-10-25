@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { excerptNoteContent, renderNoteContent } from '../admin/src/markdown.js';
+import { excerptNoteContent, extractFrontmatter, renderNoteContent } from '../admin/src/markdown.js';
 
 describe('admin note rendering', () => {
   it('keeps legacy plain text and Windows paths literal', () => {
@@ -26,6 +26,13 @@ describe('admin note rendering', () => {
     expect(renderNoteContent('`code`').format).toBe('markdown');
     expect(renderNoteContent('A | B\n--- | ---\n1 | 2').format).toBe('markdown');
     expect(excerptNoteContent('# 标题\n\n- 第一项\n- 第二项')).toBe('标题 第一项 第二项');
+  });
+
+  it('extracts a leading YAML frontmatter block only', () => {
+    expect(extractFrontmatter('---\ntitle: 笔记\n---\n\n正文')).toBe('title: 笔记');
+    expect(extractFrontmatter('---\r\ntags: [a, b]\r\n---\r\n# Body')).toBe('tags: [a, b]');
+    expect(extractFrontmatter('没有前言\n---\n不是前言')).toBeNull();
+    expect(extractFrontmatter('')).toBeNull();
   });
 
   it('keeps card excerpts compact without changing source text', () => {

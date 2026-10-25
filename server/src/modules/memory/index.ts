@@ -15,6 +15,10 @@ const VALID_CONTENT_TYPES = new Set(['project', 'note', 'article', 'doc', 'perso
 /** Valid status enum values */
 const VALID_STATUSES = new Set(['active', 'archived']);
 
+/** Valid list sort fields */
+const SORT_FIELDS = ['created_at', 'updated_at', 'title'] as const;
+type SortField = (typeof SORT_FIELDS)[number];
+
 /** UUID format validation (prevents where() injection) */
 const UUID_RE = /^[0-9a-f-]{36}$/;
 function isValidUUID(id: string): boolean {
@@ -405,6 +409,8 @@ export async function registerMemoryRoutes(app: FastifyInstance) {
       tags?: string;
       status?: string;
       review_status?: string;
+      sort_by?: string;
+      sort_order?: string;
       page?: string;
       page_size?: string;
     };
@@ -435,7 +441,14 @@ export async function registerMemoryRoutes(app: FastifyInstance) {
       rows = rows.filter(r => filterTags.some(t => r.tags.includes(t)));
     }
 
-    rows.sort((a, b) => b.created_at.localeCompare(a.created_at) || a.id.localeCompare(b.id));
+    const sortBy: SortField = (SORT_FIELDS as readonly string[]).includes(query.sort_by || '')
+      ? (query.sort_by as SortField)
+      : 'created_at';
+    const descending = query.sort_order !== 'asc';
+    rows.sort((a, b) => {
+      const compared = a[sortBy].localeCompare(b[sortBy]);
+      return (descending ? -1 : 1) * compared || a.id.localeCompare(b.id);
+    });
 
     // Pagination
     const total = rows.length;

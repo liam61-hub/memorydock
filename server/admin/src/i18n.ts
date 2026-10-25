@@ -23,6 +23,8 @@ const english = {
   '数据保存在你的设备上': 'Your data stays on your device', '编辑记忆条目': 'Edit memory',
   '刷新': 'Refresh', '关闭提示': 'Dismiss message',
   '记忆总量': 'Total memories', '已批准并可搜索': 'Approved and searchable',
+  '本地私有工作区': 'Your private local workspace',
+  '笔记保存在本机，代理提议需经你批准后才会进入搜索。': 'Memories stay on your device. Agent proposals appear in search only after you approve them.',
   '项目索引': 'Project index', '活跃项目条目': 'Active project memories',
   '待审核': 'Pending review', '尚未进入搜索': 'Not yet searchable',
   '记忆关系': 'Memory links', '已建立父子关联': 'Parent and child links',
@@ -64,6 +66,19 @@ const english = {
   '创建并索引': 'Create and index', '删除这个条目？': 'Delete this memory?',
   '删除中…': 'Deleting…', '确认删除': 'Delete memory',
   '语言': 'Language',
+  '记忆管理台': 'MEMORYDOCK CONSOLE', '记忆资料库': 'MEMORY LIBRARY',
+  'Markdown 编辑器': 'MARKDOWN EDITOR', '人工审核': 'HUMAN REVIEW',
+  '记忆关系图': 'MEMORY MAP', 'Markdown 阅读器': 'MARKDOWN READER',
+  '主题': 'Theme', '切换到深色主题': 'Switch to dark theme', '切换到浅色主题': 'Switch to light theme',
+  '本地存储信息': 'Local storage', '存储格式': 'Storage format', '纯文本 Markdown (.md)': 'Plain Markdown (.md)',
+  '索引引擎': 'Index engine', '运行模式': 'Runtime mode', '本机回环 · 单用户': 'Local loopback · single-user',
+  '排序方式': 'Sort by', '创建时间': 'Created', '更新时间': 'Updated',
+  '二级标题': 'Heading 2', '加粗': 'Bold', '斜体': 'Italic', '代码': 'Code',
+  '引用': 'Quote', '无序列表': 'List', '插入表格': 'Table', '一级标题': 'Heading 1',
+  '保存后将写入本地 Markdown 文件并更新搜索索引。': 'Saving writes a local Markdown file and updates the search index.',
+  '全部来源': 'All sources', '本地 Markdown 为唯一真实来源;LanceDB 索引可随时重建。': 'Local Markdown files are the single source of truth; the LanceDB index can be rebuilt at any time.',
+  '孤立链接': 'Unlinked references', '子条目': 'Child memories', 'YAML Frontmatter': 'YAML frontmatter',
+  '无上级条目': 'No parent memory', '已批准': 'Approved', '共': 'Total',
 } satisfies Record<string, string>;
 
 export type Phrase = keyof typeof english;

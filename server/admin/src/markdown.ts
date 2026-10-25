@@ -118,6 +118,16 @@ export function renderNoteContent(content: string): RenderedNoteContent {
   return { format: 'markdown', html: renderMarkdown(content) };
 }
 
+/**
+ * Return the leading YAML frontmatter block of a note (without its
+ * delimiters), or null when the note has none. The reader view shows it as
+ * the note's parsed metadata, mirroring the canonical Markdown on disk.
+ */
+export function extractFrontmatter(content: string): string | null {
+  const match = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(content);
+  return match ? match[1].trim() : null;
+}
+
 /** Plain, compact text for cards; never insert a note's HTML into the card. */
 export function excerptNoteContent(content: string, limit = 150): string {
   const rendered = renderNoteContent(content);

@@ -1,21 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { sanitizeMermaidSvg } from './markdown';
+import type { Theme } from './theme';
 
 type MermaidModule = typeof import('mermaid');
 
 let mermaidModule: MermaidModule | null = null;
 let diagramCounter = 0;
+let renderQueue: Promise<void> = Promise.resolve();
 
 async function loadMermaid(): Promise<MermaidModule> {
   if (!mermaidModule) {
     mermaidModule = await import('mermaid');
-    mermaidModule.default.initialize({
-      startOnLoad: false,
-      securityLevel: 'strict',
-      theme: 'neutral',
-      // v12+: root-level flag; diagram-scoped `flowchart.htmlLabels` is deprecated.
-      htmlLabels: false,
-    });
   }
   return mermaidModule;
 }
@@ -25,11 +20,13 @@ async function loadMermaid(): Promise<MermaidModule> {
  * sanitised SVG diagrams. Mermaid is lazy-loaded and only when at least one
  * mermaid block exists; render failures keep the original code block.
  */
-async function renderMermaidBlocks(root: HTMLElement, cancelled: () => boolean): Promise<void> {
+async function renderMermaidBlocks(root: HTMLElement, cancelled: () => boolean, theme: Theme): Promise<void> {
   const blocks = Array.from(root.querySelectorAll<HTMLElement>('pre > code.language-mermaid'));
   if (blocks.length === 0) return;
   try {
     const { default: mermaid } = await loadMermaid();
+    if (cancelled()) return;
+    mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: theme === 'dark' ? 'dark' : 'neutral', htmlLabels: false });
     for (const code of blocks) {
       if (cancelled()) return;
       const pre = code.closest('pre');
@@ -51,13 +48,13 @@ async function renderMermaidBlocks(root: HTMLElement, cancelled: () => boolean):
   }
 }
 
-type MarkdownViewProps = { html: string; preview?: boolean };
+type MarkdownViewProps = { html: string; preview?: boolean; theme: Theme };
 
 /**
  * Safe container for rendered Markdown HTML. Adds lazy mermaid rendering on
  * top of the sanitised `renderMarkdown` output.
  */
-export function MarkdownView({ html, preview = false }: MarkdownViewProps) {
+export function MarkdownView({ html, preview = false, theme }: MarkdownViewProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -66,13 +63,13 @@ export function MarkdownView({ html, preview = false }: MarkdownViewProps) {
     let cancelled = false;
     // Debounce so the editor preview does not re-render diagrams per keystroke.
     const timer = setTimeout(() => {
-      void renderMermaidBlocks(root, () => cancelled);
+      renderQueue = renderQueue.then(() => renderMermaidBlocks(root, () => cancelled, theme));
     }, 250);
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [html]);
+  }, [html, theme]);
 
-  return <div ref={ref} className={preview ? 'markdown-body preview' : 'markdown-body'} dangerouslySetInnerHTML={{ __html: html }} />;
+  return <div key={theme} ref={ref} className={preview ? 'markdown-body preview' : 'markdown-body'} dangerouslySetInnerHTML={{ __html: html }} />;
 }

@@ -55,6 +55,24 @@ describe('memory creation order', () => {
     await app.close();
   });
 
+  it('sorts the list by title or updated time when requested', async () => {
+    const app = Fastify({ logger: false });
+    await registerMemoryRoutes(app);
+    await seed(app, 'bravo', '2024-01-01T00:00:00.000Z');
+    await seed(app, 'alpha', '2026-01-01T00:00:00.000Z');
+    await seed(app, 'charlie', '2025-01-01T00:00:00.000Z');
+
+    const byTitle = (await app.inject({ method: 'GET', url: '/api/memories?sort_by=title&sort_order=asc' })).json().data;
+    expect(byTitle.items.map((item: { title: string }) => item.title)).toEqual(['alpha', 'bravo', 'charlie']);
+
+    const byCreatedAsc = (await app.inject({ method: 'GET', url: '/api/memories?sort_by=created_at&sort_order=asc' })).json().data;
+    expect(byCreatedAsc.items.map((item: { title: string }) => item.title)).toEqual(['bravo', 'charlie', 'alpha']);
+
+    const invalidField = (await app.inject({ method: 'GET', url: '/api/memories?sort_by=nonsense' })).json().data;
+    expect(invalidField.items.map((item: { title: string }) => item.title)).toEqual(['alpha', 'charlie', 'bravo']);
+    await app.close();
+  });
+
   it('returns keyword search results in creation order when requested', async () => {
     const app = Fastify({ logger: false });
     await registerMemoryRoutes(app);
