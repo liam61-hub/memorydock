@@ -52,7 +52,9 @@ type MarkdownViewProps = { html: string; preview?: boolean; theme: Theme };
 
 /**
  * Safe container for rendered Markdown HTML. Adds lazy mermaid rendering on
- * top of the sanitised `renderMarkdown` output.
+ * top of the sanitised `renderMarkdown` output. The `html` prop is always
+ * DOMPurify-sanitised Markdown (or plain text) from `renderNoteContent`, so
+ * the innerHTML assignment below carries no unsanitised input.
  */
 export function MarkdownView({ html, preview = false, theme }: MarkdownViewProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -71,5 +73,6 @@ export function MarkdownView({ html, preview = false, theme }: MarkdownViewProps
     };
   }, [html, theme]);
 
+  // nosemgrep: typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml — content is DOMPurify-sanitised in renderMarkdown.
   return <div key={theme} ref={ref} className={preview ? 'markdown-body preview' : 'markdown-body'} dangerouslySetInnerHTML={{ __html: html }} />;
 }
